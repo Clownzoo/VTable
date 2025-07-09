@@ -4,7 +4,7 @@
 
  * url: https://github.com/apache/echarts-doc/blob/master/build.js
  * License: https://github.com/apache/echarts-doc/blob/master/LICENSE
- * @license
+ * @license试试
  */
 
 const md2json = require('./md2json');

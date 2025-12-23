@@ -1,6 +1,6 @@
 import type { IStage, IRect, ITextCache, INode, Text, RichText, Stage, IRectGraphicAttribute } from '@src/vrender';
 import { createStage, createRect, IContainPointMode, container, vglobal, registerForVrender } from '@src/vrender';
-import type { CellRange, CellSubLocation } from '../ts-types';
+import type { CellRange, CellSubLocation, PivotChartConstructorOptions } from '../ts-types';
 import {
   type CellAddress,
   type CellLocation,
@@ -48,7 +48,7 @@ import {
   updateChartState
 } from './refresh-node/update-chart';
 import { initSceneGraph } from './group-creater/init-scenegraph';
-import { updateContainerChildrenX } from './utils/update-container';
+import { updateContainerChildrenX, updateContainerChildrenY } from './utils/update-container';
 import type { CheckBox } from '@src/vrender';
 import { loadPoptip, setPoptipTheme } from '@src/vrender';
 import textMeasureModule from './utils/text-measure';
@@ -78,6 +78,12 @@ import * as registerIcons from '../icons';
 import { temporarilyUpdateSelectRectStyle } from './select/update-select-style';
 import type { CheckboxContent } from './component/checkbox-content';
 // import { contextModule } from './context/module';
+
+import type { FederatedPointerEvent } from '@src/vrender';
+import { TABLE_EVENT_TYPE } from '../core/TABLE_EVENT_TYPE';
+import { getCellEventArgsSet } from '../event/util';
+import type { SceneEvent } from '../event/util';
+import type { Chart } from './graphic/chart';
 
 registerForVrender();
 
@@ -240,8 +246,28 @@ export class Scenegraph {
   initSceneGraph() {
     this.isPivot = this.table.isPivotTable();
     // (this.table as any).transpose = (this.table.options as any).transpose; // 初始化时this.table.transpose还未赋值
-
     initSceneGraph(this);
+  }
+
+  /**
+   * @description: 表格空数据或者少数据，在画布右键显示menu。col/row = -1 表示没有选中表格中的单元格
+   * @return {*}
+   */
+  canvasShowMenu() {
+    this.stage.addEventListener('rightdown', (e: FederatedPointerEvent) => {
+      const eventArgsSet: SceneEvent = getCellEventArgsSet(e);
+      if (!eventArgsSet.eventArgs) {
+        this.table.stateManager.triggerContextMenu(-1, -1, eventArgsSet.abstractPos.x, eventArgsSet.abstractPos.y);
+        this.table.fireListeners(TABLE_EVENT_TYPE.CONTEXTMENU_CANVAS, {
+          event: e,
+          x: eventArgsSet.abstractPos.x,
+          y: eventArgsSet.abstractPos.y,
+          col: -1,
+          row: -1,
+          target: undefined
+        });
+      }
+    });
   }
 
   /**
@@ -689,7 +715,43 @@ export class Scenegraph {
       return;
     }
     const cellGroup = this.getCell(col, row);
-    (cellGroup?.firstChild as any)?.deactivate?.();
+    if ((cellGroup?.firstChild as any)?.deactivate) {
+      const chartNode = cellGroup?.firstChild as Chart;
+      const chartType = chartNode.attribute.spec.type;
+
+      (cellGroup?.firstChild as any)?.deactivate?.(
+        this.table,
+        (this.table.options as PivotChartConstructorOptions).chartDimensionLinkage
+          ? {
+              releaseChartInstance:
+                chartType === 'scatter' // 散点图一般是横纵crosshair 所以需要判断是否是hover的单元格 是否是超出图表显示区域到了边界表头或者轴单元格
+                  ? (col !== this.table.stateManager.hover.cellPos.col &&
+                      row !== this.table.stateManager.hover.cellPos.row) ||
+                    this.table.stateManager.hover.cellPos.row < this.table.frozenRowCount ||
+                    this.table.stateManager.hover.cellPos.row >
+                      this.table.rowCount - 1 - this.table.bottomFrozenRowCount ||
+                    this.table.stateManager.hover.cellPos.col < this.table.frozenColCount ||
+                    this.table.stateManager.hover.cellPos.col > this.table.colCount - 1 - this.table.rightFrozenColCount
+                  : (this.table.options as PivotChartConstructorOptions).indicatorsAsCol //非散点图的话判断是显示横向crosshair还是纵向crosshair
+                  ? row !== this.table.stateManager.hover.cellPos.row ||
+                    this.table.stateManager.hover.cellPos.col < this.table.frozenColCount ||
+                    this.table.stateManager.hover.cellPos.col > this.table.colCount - 1 - this.table.rightFrozenColCount
+                  : col !== this.table.stateManager.hover.cellPos.col ||
+                    this.table.stateManager.hover.cellPos.row < this.table.frozenRowCount ||
+                    this.table.stateManager.hover.cellPos.row >
+                      this.table.rowCount - 1 - this.table.bottomFrozenRowCount,
+              releaseColumnChartInstance:
+                col !== this.table.stateManager.hover.cellPos.col ||
+                this.table.stateManager.hover.cellPos.row < this.table.frozenRowCount ||
+                this.table.stateManager.hover.cellPos.row > this.table.rowCount - 1 - this.table.bottomFrozenRowCount,
+              releaseRowChartInstance:
+                row !== this.table.stateManager.hover.cellPos.row ||
+                this.table.stateManager.hover.cellPos.col < this.table.frozenColCount ||
+                this.table.stateManager.hover.cellPos.col > this.table.colCount - 1 - this.table.rightFrozenColCount
+            }
+          : undefined
+      );
+    }
   }
   /**
    * hover 到单元格上 激活该单元格对应的图表实例
@@ -762,7 +824,7 @@ export class Scenegraph {
     // this.updateContainerWidth(col, detaX);
     if (!skipUpdateContainer) {
       // this.updateContainerAttrWidthAndX();
-      this.updateContainer(true);
+      this.updateContainer({ async: true });
     }
   }
 
@@ -1360,7 +1422,7 @@ export class Scenegraph {
       lastBodyCell &&
       this.table.tableNoFrameHeight < this.table.getAllRowsHeight() &&
       lastBodyCell.row === this.table.rowCount - this.table.bottomFrozenRowCount - 1 &&
-      lastBodyCell.attribute.y + lastBodyCell.attribute.height + y <
+      lastBodyCell.attribute.y + this.table.getRowHeight(lastBodyCell.row) + y <
         this.table.tableNoFrameHeight - this.table.getFrozenRowsHeight() - this.table.getBottomFrozenRowsHeight()
     ) {
       y =
@@ -1368,7 +1430,7 @@ export class Scenegraph {
         this.table.getFrozenRowsHeight() -
         this.table.getBottomFrozenRowsHeight() -
         lastBodyCell.attribute.y -
-        lastBodyCell.attribute.height;
+        this.table.getRowHeight(lastBodyCell.row);
     }
     if (this.colHeaderGroup.attribute.height + y === this.bodyGroup.attribute.y) {
       return;
@@ -1471,7 +1533,9 @@ export class Scenegraph {
     if (this.table.options.animationAppear) {
       dealWithAnimationAppear(this.table);
     }
-
+    if (this.table.options.menu?.contextMenuWorkOnlyCell === false) {
+      this.canvasShowMenu();
+    }
     this.updateNextFrame();
   }
 
@@ -1510,8 +1574,9 @@ export class Scenegraph {
       for (let col = 0; col < table.colCount; col++) {
         const colWidth = table.getColWidth(col);
         if (
-          col < table.rowHeaderLevelCount ||
-          (table.isPivotChart() && col >= table.colCount - table.rightFrozenColCount)
+          table.widthAdaptiveMode === 'only-body' &&
+          (col < table.rowHeaderLevelCount ||
+            (table.isPivotChart() && col >= table.colCount - table.rightFrozenColCount))
         ) {
           actualHeaderWidth += colWidth;
         }
@@ -1519,8 +1584,12 @@ export class Scenegraph {
       }
       // 如果内容宽度小于canvas宽度，执行adaptive放大
       if (actualWidth < canvasWidth && actualWidth > actualHeaderWidth) {
-        const startCol = table.rowHeaderLevelCount;
-        const endCol = table.isPivotChart() ? table.colCount - table.rightFrozenColCount : table.colCount;
+        let startCol = 0;
+        let endCol = table.colCount;
+        if (table.widthAdaptiveMode === 'only-body') {
+          startCol = table.rowHeaderLevelCount;
+          endCol = table.isPivotChart() ? table.colCount - table.rightFrozenColCount : table.colCount;
+        }
         getAdaptiveWidth(canvasWidth - actualHeaderWidth, startCol, endCol, false, [], table, true);
       }
     }
@@ -1769,26 +1838,87 @@ export class Scenegraph {
     this.bodyGroup.setAttribute('x', this.rowHeaderGroup.attribute.width);
   }
 
-  updateContainer(async: boolean = false) {
-    if (async) {
+  updateContainerAttrHeightAndY() {
+    for (let i = 0; i < this.cornerHeaderGroup.children.length; i++) {
+      updateContainerChildrenY(this.cornerHeaderGroup.children[i] as Group, 0);
+    }
+    for (let i = 0; i < this.colHeaderGroup.children.length; i++) {
+      updateContainerChildrenY(this.colHeaderGroup.children[i] as Group, 0);
+    }
+    for (let i = 0; i < this.rightTopCornerGroup.children.length; i++) {
+      updateContainerChildrenY(this.rightTopCornerGroup.children[i] as Group, 0);
+    }
+    for (let i = 0; i < this.rowHeaderGroup.children.length; i++) {
+      this.rowHeaderGroup.children[i].firstChild &&
+        updateContainerChildrenY(
+          this.rowHeaderGroup.children[i] as Group,
+          (this.rowHeaderGroup.children[i].firstChild as Group).row > 0
+            ? this.table.getRowsHeight(
+                this.table.frozenRowCount ?? 0,
+                (this.rowHeaderGroup.children[i].firstChild as Group).row - 1
+              )
+            : 0
+        );
+    }
+    for (let i = 0; i < this.bodyGroup.children.length; i++) {
+      this.bodyGroup.children[i].firstChild &&
+        updateContainerChildrenY(
+          this.bodyGroup.children[i] as Group,
+          (this.bodyGroup.children[i].firstChild as Group).row > 0
+            ? this.table.getRowsHeight(
+                this.table.frozenRowCount ?? 0,
+                (this.bodyGroup.children[i].firstChild as Group).row - 1
+              )
+            : 0
+        );
+    }
+    for (let i = 0; i < this.rightFrozenGroup.children.length; i++) {
+      this.rightFrozenGroup.children[i].firstChild &&
+        updateContainerChildrenY(
+          this.rightFrozenGroup.children[i] as Group,
+          (this.rightFrozenGroup.children[i].firstChild as Group).row > 0
+            ? this.table.getRowsHeight(
+                this.table.frozenRowCount ?? 0,
+                (this.rightFrozenGroup.children[i].firstChild as Group).row - 1
+              )
+            : 0
+        );
+    }
+    for (let i = 0; i < this.leftBottomCornerGroup.children.length; i++) {
+      updateContainerChildrenY(this.leftBottomCornerGroup.children[i] as Group, 0);
+    }
+    for (let i = 0; i < this.bottomFrozenGroup.children.length; i++) {
+      updateContainerChildrenY(this.bottomFrozenGroup.children[i] as Group, 0);
+    }
+    for (let i = 0; i < this.rightBottomCornerGroup.children.length; i++) {
+      updateContainerChildrenY(this.rightBottomCornerGroup.children[i] as Group, 0);
+    }
+  }
+  updateContainer(
+    updateConfig: { async?: boolean; needUpdateCellY?: boolean } = { async: false, needUpdateCellY: false }
+  ) {
+    if (updateConfig.async) {
       if (!this._needUpdateContainer) {
         this._needUpdateContainer = true;
         setTimeout(() => {
-          this.updateContainerSync();
+          this.updateContainerSync(updateConfig.needUpdateCellY ?? false);
         }, 0);
       }
     } else {
       this._needUpdateContainer = true;
-      this.updateContainerSync();
+      this.updateContainerSync(updateConfig.needUpdateCellY ?? false);
     }
   }
 
-  updateContainerSync() {
+  updateContainerSync(needUpdateCellY: boolean = false) {
     if (!this._needUpdateContainer) {
       return;
     }
     this._needUpdateContainer = false;
     this.updateContainerAttrWidthAndX();
+    if (needUpdateCellY) {
+      this.updateContainerAttrHeightAndY();
+    }
     this.updateTableSize();
     this.component.updateScrollBar();
 
@@ -2186,7 +2316,8 @@ export class Scenegraph {
       // }
       for (let i = 0; i < updateRows.length; i++) {
         const row = updateRows[i];
-        const oldHeight = this.table.getRowHeight(row);
+        // const oldHeight = this.table.getRowHeight(row);
+        const oldHeight = this.table.rowHeightsMap.get(row); // 避免在小数情况下的自动取整
         const newHeight = computeRowHeight(row, 0, this.table.colCount - 1, this.table);
         if (
           (row >= this.proxy.rowStart && row <= this.proxy.rowEnd) ||
@@ -2288,7 +2419,7 @@ export class Scenegraph {
       return this.table.getRowsHeight(0, row - 1);
     } else if (row < this.table.rowCount - this.table.bottomFrozenRowCount) {
       // body
-      return this.table.getRowsHeight(this.table.frozenRowCount, row - 1);
+      return this.table.getRowsHeight(this.table.columnHeaderLevelCount, row - 1);
     } else if (row < this.table.rowCount) {
       // bottom frozen
       return this.table.getRowsHeight(this.table.rowCount - this.table.bottomFrozenRowCount, row - 1);

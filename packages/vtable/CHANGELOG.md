@@ -1,6 +1,428 @@
 # Change Log - @visactor/vtable
 
-This log was last generated on Tue, 01 Jul 2025 10:26:51 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Dec 2025 09:28:21 GMT and should not be manually modified.
+
+## 1.22.8
+Wed, 17 Dec 2025 09:28:21 GMT
+
+### Updates
+
+- fix: when pivot table set grid-tree subTotal value not show #4815
+
+
+- docs: supplement chartDimensionLinkage demo
+
+
+- feat: vtable-sheet support cross sheet calculate formula
+
+
+- feat: support import multiply sheets from excel file
+
+
+- fix: scroll bug when update option
+- feat: add update styles api for filter plugin.close#4790
+- feat: support custom styles. close#4720
+- feat: support custom conditionCategories. close#4781
+- fix: filter swtich enable erroe. fix#4783
+- feat: emit event when filter menu hide or show. close#4784
+- fix: apply filter after update table data. fix#4785
+- feat: add option to format display value. close#4786
+- fix: update filter state and keys when update data. fix#4787
+- feat: menu limit to body range. close#4791
+- fix: select none not effect. fix#4792
+- feat: add config to disable sync multiple filter state. close#4793
+- fix: empty line bug
+- fix: update checkbox state after update data. fix#4795
+- add config to control filter result
+- feat: excel export multiply sheets
+
+
+- fix: delete key down should not complete edit cell
+
+
+- fix: pivotChart linkage getAxis node occor error
+
+
+- fix: panel hide when press enter. fix#4813
+
+## 1.22.7
+Mon, 08 Dec 2025 09:36:02 GMT
+
+### Updates
+
+- refactor: optimize linkage pivotChart tooltip
+
+
+- fix: pivotChart axis should change zero when has range
+
+
+- feat: resize support set canResizeColumn function #4764
+
+
+
+## 1.22.6
+Mon, 01 Dec 2025 11:33:45 GMT
+
+### Updates
+
+- feat: copy formula to paste cell
+
+
+- feat: vtable-sheet support formula auto fill
+
+
+- fix: excel keyboard del and back to delete
+
+
+- fix: distinguish null and empty string values in row/column dimensions
+
+
+- fix: the filter plugin cannot be opened normally when clicked #4736
+
+
+- fix: clear the value of the searchInput when the filter plugin is displayed #4736
+
+
+
+## 1.22.5
+Wed, 26 Nov 2025 02:07:13 GMT
+
+### Updates
+
+- feat: support right axis in pivotChart spec #4723
+
+
+- feat: add enableChartDimensionLinkage for pivotChart
+
+
+- feat: add chartDimensionLinkage for pivotChart
+
+
+- fix: add null check for nodeChildren in matchDimensionPath
+
+
+
+## 1.22.4
+Tue, 18 Nov 2025 06:13:47 GMT
+
+### Updates
+
+- refactor: filter plugins update when filterState changes
+- fix: fix backtracking issue in getCellAdressByHeaderPath matching algorithm
+
+
+- fix(pivot-table): fix frozenColCount being invalid when set to 0
+
+
+- fix: the serial number cannot be edited #4627
+
+
+
+## 1.22.3
+Fri, 07 Nov 2025 09:51:25 GMT
+
+### Updates
+
+- fix: vtable-sheet drag column position #4645
+
+
+- feat: add dragOrder to vtableSheet
+
+
+- refactor: overscrollBehavior set none not scrollbar effect #4675
+
+
+- fix: leftTop cornder render frame border line #4677
+
+
+- feat: add api getCellRowHeaderFullPaths for pivotTable
+
+
+- feat: support boxPlot chart in pivotChart
+
+
+- fix: the getTargetGroup method of vue-vtable #4663
+
+
+
+## 1.22.2
+Wed, 29 Oct 2025 04:47:13 GMT
+
+### Updates
+
+- feat: drag order for vtable-sheet
+
+
+- fix: drag row order to update rowHeightMap
+
+
+- feat: drag column order to update and calculate formula
+
+
+- fix: select row use row series number with cell merge, select state error
+
+
+- refactor: requestAnimationFrame use vrender api #4619
+
+
+- refactor: formula context support lower case character #4628
+
+
+- fix: after resize column width legend title position error #4629
+
+
+- feat: add adaptive mode for auto fill width
+- fix: adjust formula dependency cell change
+
+
+- fix: fix issue of markline layout in PivotChart
+
+
+- fix: the resize event of tableContainer #4558
+
+
+- fix: vue-vtable dynamic rendering editing #4621
+
+
+- feat: the addition of the refValue parameter in vue-vtable dynamic rendering editing now supports v-model #4597
+
+
+
+## 1.22.1
+Fri, 17 Oct 2025 02:49:45 GMT
+
+### Minor changes
+
+- feat: add master detail table plugin
+
+
+
+### Updates
+
+- fix: the getFilteredRecords method of PivotTable
+
+
+- feat: a new getFilteredRecords method has been added to ListTable #4537
+
+
+- fix: plugin HighlightHeaderWhenSelectCellPlugin options parse
+
+
+
+## 1.21.1
+Tue, 14 Oct 2025 03:40:50 GMT
+
+### Updates
+
+- fix: zoom axis component should release
+
+
+
+## 1.21.0
+Mon, 13 Oct 2025 09:24:03 GMT
+
+### Updates
+
+- fix: the updateFilterRules method of PivotTable #4450
+
+## 1.20.3
+Fri, 10 Oct 2025 11:28:59 GMT
+
+### Updates
+
+- fix: paste html to cell no work #4551
+
+
+- fix: select formula item use keyboard arrowUp and arrowDown
+
+
+- fix: dbclick the automatic column width in the rightFrozenColCount configuration #4526
+
+
+
+## 1.20.2
+Thu, 09 Oct 2025 10:16:27 GMT
+
+### Updates
+
+- fix: umd build for plugins
+
+
+- docs: vtable sheet umd import
+
+
+- fix: search component clear method #4476
+
+
+
+## 1.20.1
+Fri, 26 Sep 2025 10:28:51 GMT
+
+### Updates
+
+- feat: extend chart type
+
+
+- fix: deleteRecord switchState error after call renderWidthCreateCells api #4436
+
+
+- fix: maxfrozenwidth not work when set brower scale #4494
+
+
+- fix: gannt grid line style linedash not work #4495
+
+
+- fix: when updateOption change enablecheckboxcascade not work #4499
+
+
+- fix: api selectCells not work with ctrlMultiSelect false
+
+
+- fix: row change order not work with pagination
+
+
+- feat: support detailPath when pick vchart to add detectPickChartItem config
+
+
+
+## 1.20.0
+Mon, 22 Sep 2025 03:03:09 GMT
+
+### Minor changes
+
+- feat: add vtable sheet component
+
+
+
+### Updates
+
+- chore: update vrender version to 1.0.16
+
+
+- feat: add cutSelected for vtable
+
+
+- feat: add HyperFormula & refactor formulat-manager
+
+
+
+## 1.19.9
+Fri, 12 Sep 2025 09:25:46 GMT
+
+### Updates
+
+- fix: add isReleased check before resize in initialization
+
+## 1.19.8
+Fri, 29 Aug 2025 06:50:15 GMT
+
+### Updates
+
+- fix: getLayoutRowTree api error #4346
+
+
+- fix: when has many columns expand columnTree scenegraph node y error #4357
+
+
+- refactor: contextmenu-click event arguments #4364
+
+
+- fix: columnWidthConfig not work when just has indicator on pivot table #4388
+
+
+
+## 1.19.7
+Mon, 18 Aug 2025 11:14:19 GMT
+
+_Version update only_
+
+## 1.19.6
+Fri, 08 Aug 2025 06:24:08 GMT
+
+### Updates
+
+- fix: pivot table set columnHierarchyType gird expand tree error #4254
+
+
+- fix: when no records markline render error #4305
+
+
+- feat: pivot chart add columnWidthConfig option
+
+
+- refactor: add table export plugin
+
+
+
+## 1.19.5
+Thu, 31 Jul 2025 11:30:27 GMT
+
+### Updates
+
+- feat: add enableHeaderCheckboxCascade option
+
+
+- refactor: when delete and add records update checkstate #4240
+
+
+- fix: setCellCheckboxState not work when tree column set checkbox cell type
+
+
+- feat: add  move_end_task_bar event for vtable-gantt.#4266
+
+
+
+## 1.19.4
+Mon, 28 Jul 2025 09:57:02 GMT
+
+### Updates
+
+- refactor: update merge cell performance #3293
+
+
+- feat: rowSeriesNumber support set field #3902
+
+
+- feat: add enableCheckboxCascade option #4130
+
+
+- feat: add groupConfig replace groupBy and group** & add titleCheckbox #4130
+
+
+- refactor: hide menu list when scroll #4214
+
+
+- feat: add getRecordHierarchyState api and fix change header position arguments #4226
+
+
+- fix: vchart trasnparent bgColor replace cell hover color #4245
+
+
+- fix: fix loading icon update in pivot-table #4236
+- feat: add paste-add-row plugin
+
+
+- Merge branch feat/paste-add-row-plugin into feat-pasted-add-row-col-plugin
+
+
+
+## 1.19.3
+Wed, 09 Jul 2025 09:24:55 GMT
+
+### Updates
+
+- feat: add contextmenuReturnAllSelectedCells api #4064
+
+
+- fix: click to edit cell not work with groupBy #4172
+
+
+- fix: 修复自定义编辑器复制粘贴时无法触发异步校验的问题
+
+
+- fix: handle frozen column calculation when container is invisible
+
+
 
 ## 1.19.2
 Tue, 01 Jul 2025 10:26:51 GMT

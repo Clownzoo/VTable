@@ -52,7 +52,6 @@ export type TaskBarInteractionArgumentType = {
 };
 ```
 
-
 {{ use: common-gantt-task-bar-style }}
 
 ${prefix} milestoneStyle(ITaskBarStyle)
@@ -110,6 +109,26 @@ export type TaskBarInteractionArgumentType = {
   ganttInstance: Gantt;
 };
 ```
+
+${prefix} progressAdjustable(boolean | Function) = true
+
+Whether the task progress can be adjusted. The default is true. When set to true, users can drag the progress handle on the task bar to adjust the progress percentage. When set to false, the progress handle will be hidden and progress adjustment is disabled.
+
+Optional
+
+```
+progressAdjustable?: boolean | ((interactionArgs: TaskBarInteractionArgumentType) => boolean);
+
+export type TaskBarInteractionArgumentType = {
+  taskRecord: any;
+  index: number;
+  startDate: Date;
+  endDate: Date;
+  ganttInstance: Gantt;
+};
+```
+
+**Note:** Progress adjustment is only available when the task has a progress field defined. Milestone tasks cannot have their progress adjusted.
 
 ${prefix} moveToExtendDateRange(boolean) = true
 
@@ -209,5 +228,11 @@ Optional
 ${prefix} minWidth(number)
 
 The minimum width of the task bar creation button.
+
+Optional
+
+${prefix} clip(boolean)
+
+Whether to crop out the part that overflows the taskBar, the default is true
 
 Optional

@@ -2,6 +2,7 @@
 import * as VTable from '../../src';
 import VChart from '@visactor/vchart';
 import { bindDebugTool } from '../../src/scenegraph/debug-tool';
+import { IChartIndicator } from '../../src/ts-types/pivot-table';
 const CONTAINER_ID = 'vTable';
 VTable.register.chartModule('vchart', VChart);
 export function createTable() {
@@ -16,10 +17,10 @@ export function createTable() {
       }
     }
   ];
-  const rows = [
+  const rows: (VTable.TYPES.IRowDimension | string)[] = [
     {
       dimensionKey: '230417171050031',
-      title: '国家',
+      title: '国家f',
       // width:200,
       headerStyle: {
         color: 'red',
@@ -35,7 +36,7 @@ export function createTable() {
     }
     // '230417170554008'
   ];
-  const indicators: VTable.TYPES.IIndicator[] = [
+  const indicators: (IChartIndicator | string)[] = [
     {
       indicatorKey: '230417171050011',
       title: '数量',
@@ -64,7 +65,34 @@ export function createTable() {
         yField: '230417170554008',
         seriesField: '230417171050030',
         axes: [
-          { orient: 'left', visible: true, label: { visible: true } },
+          {
+            orient: 'left',
+            visible: true,
+            label: { visible: true },
+            labelHoverOnAxis: {
+              visible: true,
+              position: 50,
+              autoRotate: false,
+              space: 0,
+              padding: 2,
+              textStyle: {
+                fontSize: 12,
+                fill: '#363839',
+                fontWeight: 'normal',
+                fillOpacity: 1,
+                textAlign: 'right',
+                textBaseline: 'middle'
+              },
+              background: {
+                visible: true,
+                style: {
+                  fill: 'red'
+                }
+              },
+              text: ''
+              // maxWidth: 100
+            }
+          },
           { orient: 'bottom', visible: true }
         ],
         bar: {
@@ -9191,6 +9219,41 @@ export function createTable() {
     }
   ];
   const option: VTable.PivotChartConstructorOptions = {
+    chartDimensionLinkage: {
+      showTooltip: true,
+      heightLimitToShowTooltipForEdgeRow: 60,
+      widthLimitToShowTooltipForEdgeColumn: 20
+    },
+    columnWidthConfigForRowHeader: [
+      {
+        dimensions: [
+          {
+            dimensionKey: '230417171050031',
+            value: '中国',
+            isPivotCorner: false,
+            indicatorKey: undefined
+          }
+        ],
+        width: 100
+      }
+    ],
+    columnWidthConfig: [
+      {
+        dimensions: [
+          {
+            dimensionKey: '230417170554012',
+            value: '一级',
+            isPivotCorner: false,
+            indicatorKey: undefined
+          },
+          {
+            value: '数量',
+            indicatorKey: '230417171050011'
+          }
+        ],
+        width: 100
+      }
+    ],
     rows,
     columns,
     indicators,
@@ -9198,11 +9261,11 @@ export function createTable() {
     container: document.getElementById(CONTAINER_ID),
     records,
     // widthMode:'autoWidth',
-    heightMode: 'adaptive',
+    // heightMode: 'adaptive',
     defaultRowHeight: 200,
     defaultHeaderRowHeight: 30,
-    defaultColWidth: 280,
-    defaultHeaderColWidth: [80],
+    defaultColWidth: 180,
+    defaultHeaderColWidth: [80, 'auto', 'auto'],
 
     corner: {
       titleOnDimension: 'row',
@@ -9295,7 +9358,7 @@ export function createTable() {
   });
   window.tableInstance = tableInstance;
 
-  bindDebugTool(tableInstance.scenegraph.stage, {
-    customGrapicKeys: ['col', 'row']
-  });
+  // bindDebugTool(tableInstance.scenegraph.stage, {
+  //   customGrapicKeys: ['col', 'row']
+  // });
 }

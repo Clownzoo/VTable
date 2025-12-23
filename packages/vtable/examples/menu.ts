@@ -85,6 +85,10 @@ export const menus = [
       },
       {
         path: 'list',
+        name: 'list-data-del-promise'
+      },
+      {
+        path: 'list',
         name: 'list-dataSource-changeOrder'
       },
       {
@@ -171,6 +175,10 @@ export const menus = [
       {
         path: 'list',
         name: 'list-group'
+      },
+      {
+        path: 'list',
+        name: 'list-groupBy'
       },
       {
         path: 'list',
@@ -277,6 +285,10 @@ export const menus = [
       {
         path: 'pivot',
         name: 'virtual-node-2'
+      },
+      {
+        path: 'pivot',
+        name: 'pivot-autoFillWidth'
       }
     ]
   },
@@ -321,6 +333,14 @@ export const menus = [
       },
       {
         path: 'pivot-chart',
+        name: 'pivotChart-scatter2'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-scatter-reverse'
+      },
+      {
+        path: 'pivot-chart',
         name: 'pivotChart-pie'
       },
       {
@@ -330,6 +350,50 @@ export const menus = [
       {
         path: 'pivot-chart',
         name: 'pivotChart-pie-legend'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-funnel-legend'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-heatmap-legend'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-heatmap-twoIndicator'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-histogram'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-histogram-horital'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-sunburst'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-treemap'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-sankey'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-circlePacking'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-boxPlot'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-boxPlot-horizontal'
       },
       {
         path: 'pivot-chart',
@@ -418,6 +482,26 @@ export const menus = [
       {
         path: 'pivot-chart',
         name: 'pivotChart-aeolus-large-column'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-linkage'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-rightAxis'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-combined'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'pivotChart-line'
+      },
+      {
+        path: 'pivot-chart',
+        name: 'linkage-pivotChart-horizontal'
       }
     ]
   },
@@ -479,6 +563,10 @@ export const menus = [
       {
         path: 'type',
         name: 'button'
+      },
+      {
+        path: 'type',
+        name: 'custom'
       }
     ]
   },
@@ -834,6 +922,10 @@ export const menus = [
       {
         path: 'theme',
         name: 'custom-list'
+      },
+      {
+        path: 'theme',
+        name: 'scroll-style'
       }
     ]
   },
@@ -982,6 +1074,10 @@ export const menus = [
       {
         path: 'frozen',
         name: 'list-table-right-frozen'
+      },
+      {
+        path: 'frozen',
+        name: 'list-table-scrollx-skip-frozen'
       },
       {
         path: 'frozen',

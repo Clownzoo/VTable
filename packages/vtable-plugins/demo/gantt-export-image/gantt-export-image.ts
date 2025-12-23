@@ -268,8 +268,32 @@ export function createTable() {
     }
   ];
   const option = {
-    overscrollBehavior: 'none',
+    overscrollBehavior: 'none' as const,
     records,
+    dependency: {
+      links: [
+        {
+          type: VTableGantt.TYPES.DependencyType.FinishToStart,
+          linkedFromTaskKey: 1,
+          linkedToTaskKey: 2
+        },
+        {
+          type: VTableGantt.TYPES.DependencyType.StartToFinish,
+          linkedFromTaskKey: 2,
+          linkedToTaskKey: 3
+        },
+        {
+          type: VTableGantt.TYPES.DependencyType.StartToStart,
+          linkedFromTaskKey: 3,
+          linkedToTaskKey: 4
+        },
+        {
+          type: VTableGantt.TYPES.DependencyType.FinishToFinish,
+          linkedFromTaskKey: 4,
+          linkedToTaskKey: 5
+        }
+      ]
+    },
     taskListTable: {
       columns,
       tableWidth: 300,
@@ -339,7 +363,7 @@ export function createTable() {
       labelTextStyle: {
         fontFamily: 'Arial',
         fontSize: 16,
-        textAlign: 'left',
+        textAlign: 'left' as const,
         textOverflow: 'ellipsis'
       },
       barStyle: {
@@ -369,10 +393,10 @@ export function createTable() {
       },
       scales: [
         {
-          unit: 'week',
+          unit: 'week' as const,
           step: 1,
-          startOfWeek: 'sunday',
-          format(date) {
+          startOfWeek: 'sunday' as const,
+          format(date: VTableGantt.TYPES.DateFormatArgumentType) {
             return `Week ${date.dateIndex}`;
           },
           style: {
@@ -380,17 +404,16 @@ export function createTable() {
             fontWeight: 'bold',
             color: 'white',
             strokeColor: 'black',
-            textAlign: 'right',
-            textBaseline: 'bottom',
-            backgroundColor: '#EEF1F5',
+            textAlign: 'right' as const,
+            textBaseline: 'bottom' as const,
             textStick: true
             // padding: [0, 30, 0, 20]
           }
         },
         {
-          unit: 'day',
+          unit: 'day' as const,
           step: 1,
-          format(date) {
+          format(date: VTableGantt.TYPES.DateFormatArgumentType) {
             return date.dateIndex.toString();
           },
           style: {
@@ -398,9 +421,8 @@ export function createTable() {
             fontWeight: 'bold',
             color: 'white',
             strokeColor: 'black',
-            textAlign: 'right',
-            textBaseline: 'bottom',
-            backgroundColor: '#EEF1F5'
+            textAlign: 'right' as const,
+            textBaseline: 'bottom' as const
           }
         }
       ]
@@ -409,7 +431,7 @@ export function createTable() {
       {
         date: '2024/8/02',
         scrollToMarkLine: true,
-        position: 'left',
+        position: 'left' as const,
         style: {
           lineColor: 'red',
           lineWidth: 1
@@ -429,7 +451,7 @@ export function createTable() {
     },
     scrollStyle: {
       scrollRailColor: 'RGBA(246,246,246,0.5)',
-      visible: 'scrolling',
+      visible: 'scrolling' as const,
       width: 6,
       scrollSliderCornerRadius: 2,
       scrollSliderColor: '#5cb85c'
@@ -438,7 +460,10 @@ export function createTable() {
   };
 
   // 获取或创建容器
-  const container = document.getElementById(CONTAINER_ID)!;
+  const container = document.getElementById(CONTAINER_ID);
+  if (!container) {
+    throw new Error('Container element not found');
+  }
 
   // 创建一个包装容器
   const wrapper = document.createElement('div');

@@ -182,7 +182,9 @@ export class TableTheme implements ITableThemeDefine {
               get inlineColumnBgColor(): ColorPropertyDefine | undefined {
                 return (
                   defaultStyle.hover?.inlineColumnBgColor ??
-                  (defaultStyle.hover?.cellBgColor && typeof defaultStyle.hover?.cellBgColor === 'string'
+                  (defaultStyle.hover?.cellBgColor &&
+                  typeof defaultStyle.hover?.cellBgColor === 'string' &&
+                  defaultStyle.hover?.cellBgColor !== 'transparent'
                     ? changeColor(defaultStyle.hover?.cellBgColor, 0.1, false)
                     : undefined) ??
                   undefined
@@ -191,7 +193,9 @@ export class TableTheme implements ITableThemeDefine {
               get inlineRowBgColor(): ColorPropertyDefine | undefined {
                 return (
                   defaultStyle.hover?.inlineRowBgColor ??
-                  (defaultStyle.hover?.cellBgColor && typeof defaultStyle.hover?.cellBgColor === 'string'
+                  (defaultStyle.hover?.cellBgColor &&
+                  typeof defaultStyle.hover?.cellBgColor === 'string' &&
+                  defaultStyle.hover?.cellBgColor !== 'transparent'
                     ? changeColor(defaultStyle.hover?.cellBgColor, 0.1, false)
                     : undefined) ??
                   undefined
@@ -208,7 +212,9 @@ export class TableTheme implements ITableThemeDefine {
                 return (
                   defaultStyle.select?.inlineColumnBgColor ??
                   that.selectionStyle?.inlineColumnBgColor ??
-                  (that.selectionStyle?.cellBgColor && typeof that.selectionStyle.cellBgColor === 'string'
+                  (that.selectionStyle?.cellBgColor &&
+                  typeof that.selectionStyle.cellBgColor === 'string' &&
+                  that.selectionStyle.cellBgColor !== 'transparent'
                     ? changeColor(that.selectionStyle.cellBgColor, 0.1, false)
                     : undefined) ??
                   undefined
@@ -218,7 +224,9 @@ export class TableTheme implements ITableThemeDefine {
                 return (
                   defaultStyle.select?.inlineRowBgColor ??
                   that.selectionStyle.inlineRowBgColor ??
-                  (that.selectionStyle?.cellBgColor && typeof that.selectionStyle.cellBgColor === 'string'
+                  (that.selectionStyle?.cellBgColor &&
+                  typeof that.selectionStyle.cellBgColor === 'string' &&
+                  that.selectionStyle.cellBgColor !== 'transparent'
                     ? changeColor(that.selectionStyle.cellBgColor, 0.1, false)
                     : undefined) ??
                   undefined
@@ -510,6 +518,9 @@ export class TableTheme implements ITableThemeDefine {
         },
         get verticalPadding(): number | [number, number, number, number] {
           return scroll.verticalPadding ?? 0;
+        },
+        get ignoreFrozenCols(): boolean | undefined {
+          return scroll.ignoreFrozenCols ?? false;
         }
       };
     }
@@ -832,7 +843,7 @@ export class TableTheme implements ITableThemeDefine {
   extends(obj: PartialTableThemeDefine): TableTheme {
     return new TableTheme(
       ingoreNoneValueMerge({}, obj),
-      ingoreNoneValueMerge(this.internalTheme.superTheme, this.internalTheme.obj)
+      ingoreNoneValueMerge({}, this.internalTheme.superTheme, this.internalTheme.obj)
     );
   }
   private getStyle(style: ThemeStyle) {
@@ -880,7 +891,9 @@ export class TableTheme implements ITableThemeDefine {
             get inlineColumnBgColor(): ColorPropertyDefine | undefined {
               return (
                 style.hover?.inlineColumnBgColor ??
-                (style.hover?.cellBgColor && typeof style.hover?.cellBgColor === 'string'
+                (style.hover?.cellBgColor &&
+                typeof style.hover?.cellBgColor === 'string' &&
+                style.hover?.cellBgColor !== 'transparent'
                   ? changeColor(style.hover?.cellBgColor, 0.1, false)
                   : undefined) ??
                 undefined
@@ -889,7 +902,9 @@ export class TableTheme implements ITableThemeDefine {
             get inlineRowBgColor(): ColorPropertyDefine | undefined {
               return (
                 style.hover?.inlineRowBgColor ??
-                (style.hover?.cellBgColor && typeof style.hover?.cellBgColor === 'string'
+                (style.hover?.cellBgColor &&
+                typeof style.hover?.cellBgColor === 'string' &&
+                style.hover?.cellBgColor !== 'transparent'
                   ? changeColor(style.hover?.cellBgColor, 0.1, false)
                   : undefined) ??
                 undefined
@@ -906,7 +921,9 @@ export class TableTheme implements ITableThemeDefine {
             return (
               style.select?.inlineColumnBgColor ??
               that.selectionStyle?.inlineColumnBgColor ??
-              (that.selectionStyle?.cellBgColor && typeof that.selectionStyle.cellBgColor === 'string'
+              (that.selectionStyle?.cellBgColor &&
+              typeof that.selectionStyle.cellBgColor === 'string' &&
+              that.selectionStyle.cellBgColor !== 'transparent'
                 ? changeColor(that.selectionStyle.cellBgColor, 0.1, false)
                 : undefined) ??
               undefined
@@ -916,7 +933,9 @@ export class TableTheme implements ITableThemeDefine {
             return (
               style.select?.inlineRowBgColor ??
               that.selectionStyle.inlineRowBgColor ??
-              (that.selectionStyle?.cellBgColor && typeof that.selectionStyle.cellBgColor === 'string'
+              (that.selectionStyle?.cellBgColor &&
+              typeof that.selectionStyle.cellBgColor === 'string' &&
+              that.selectionStyle.cellBgColor !== 'transparent'
                 ? changeColor(that.selectionStyle.cellBgColor, 0.1, false)
                 : undefined) ??
               undefined

@@ -58,7 +58,6 @@ containerFit: {
 
 与自适应模式（`widthMode: 'adaptive'` 或 `heightMode: 'adaptive'`）拉伸内容以填充容器不同，`containerFit` 保持原始内容尺寸，并适当填充剩余空间。
 
-
 #${prefix} autoWrapText(boolean) = false
 
 是否自动换行
@@ -111,7 +110,7 @@ containerFit: {
 
 #${prefix} unfreezeAllOnExceedsMaxWidth(boolean) = true
 
-超过最大冻结宽度后是否全部解冻，默认 true
+超过最大冻结宽度后是否全部解冻，默认 true。如果设置为 false，则不会解冻全部列，而是根据 maxFrozenWidth 的值来决定最终解冻的列数。
 
 #${prefix} showFrozenIcon(boolean) = true
 
@@ -153,7 +152,7 @@ containerFit: {
 
 快捷键功能设置，具体配置项：
 
-##${prefix} selectAllOnCtrlA(boolean) = false
+##${prefix} selectAllOnCtrlA(boolean) = false|SelectAllOnCtrlAOption
 开启快捷键全选。
 支持 `boolean` 或者具体配置类型`SelectAllOnCtrlAOption`。
 
@@ -163,9 +162,20 @@ export interface SelectAllOnCtrlAOption {
   disableRowSeriesNumberSelect?: boolean;  //快捷键全选时，是否禁止选中行序列号。
 }
 ```
+###${prefix} disableHeaderSelect(boolean) = false
+快捷键全选时，是否禁止选中表头。
+
+###${prefix} disableRowSeriesNumberSelect(boolean) = false
+快捷键全选时，是否禁止选中行序列号。
 
 ##${prefix} copySelected(boolean) = false
 开启快捷键复制，与浏览器的快捷键一致。
+
+##${prefix} cutSelected(boolean) = false
+开启快捷键剪切，与浏览器的快捷键一致。
+
+##${prefix} showCopyCellBorder(boolean) = false
+是否显示复制单元格的边框，默认：false。
 
 ##${prefix} pasteValueToCell(boolean) = false
 开启快捷键粘贴，与浏览器的快捷键一致。粘贴生效仅针对配置了编辑 editor 的单元格
@@ -194,6 +204,10 @@ export interface SelectAllOnCtrlAOption {
 
 是否开启 ctrl 多选框，默认开启。
 
+##${prefix} shiftMultiSelect(boolean) = true
+
+是否开启 shift 多选框，默认开启。
+
 #${prefix} eventOptions(Object)
 
 事件触发相关问题设置，具体配置项：
@@ -203,7 +217,7 @@ export interface SelectAllOnCtrlAOption {
 
 ##${prefix} contextmenuReturnAllSelectedCells(boolean) = true
 
-右键菜单事件回传给用户参数中是否组织所有选中cells信息，默认true。如果不需要最好主动设置为false。
+右键菜单事件回传给用户参数中是否组织所有选中 cells 信息，默认 true。如果不需要最好主动设置为 false。
 
 #${prefix} excelOptions(Object)
 
@@ -272,13 +286,18 @@ hover 交互响应模式：十字交叉、整列、整行或者单个单元格�
 
 点击空白区域是否取消选中。
 
-##${prefix} outsideClickDeselect(boolean) = true
+##${prefix} outsideClickDeselect(boolean) = false
 
 点击外部区域是否取消选中。
 
 ##${prefix} disableDragSelect(boolean) = true
 
 拖拽选择单元格时是否禁用框选。
+
+##${prefix} disableSelectOnContextMenu(boolean) = true
+
+右键点击单元格是否禁用选择单元格。
+
 
 ##${prefix} highlightInRange(boolean) = false
 
@@ -341,6 +360,10 @@ DropDownMenuHighlightInfo 的定义如下：
 
 {{ use: common-IDimensionInfo()}}
 
+##${prefix} contextMenuWorkOnlyCell(boolean)
+
+右键菜单是否只工作在单元格上。默认true只在单元格上显示右键菜单, 配置false在空白处也弹出右键菜单
+
 #${prefix} title(Object)
 
 {{ use: common-title(
@@ -377,6 +400,10 @@ html 目前实现较完整，先默认使用 html 渲染方式。目前暂不支
 ##${prefix} confine (boolean) = true
 
 是否将 tooltip 框限制在画布区域内，默认开启。针对 renderMode:"html" 有效。
+
+##${prefix} position(string) = 'top'
+
+tooltip 框位置，可选 top left right bottom
 
 #${prefix} legends
 
@@ -424,6 +451,10 @@ html 目前实现较完整，先默认使用 html 渲染方式。目前暂不支
     ]
 }
 ```
+
+#${prefix} chartOption(Object)
+
+具体同 VChart 的 Option 配置。会与表格中标准的 chart Option 配置进行合并，后在图表中使用。
 
 #${prefix} customRender(Function|Object)
 
@@ -664,6 +695,14 @@ animationAppear?: boolean | {
 - `indicatorGroup`: 调整同父级维度下所有指标行的宽度
 - `all`： 所有行高都被调整
 
+##${prefix} canResizeColumn(Function)
+
+是否可调整列宽，支持配置函数，函数返回值为 boolean，返回 true 则可调整列宽，返回 false 则不可调整列宽。
+
+```
+canResizeColumn?: (col: number, row: number, table: BaseTableAPI) => boolean;
+```
+
 #${prefix} dragOrder(Object)
 
 拖拽移动位置的配置。
@@ -693,3 +732,22 @@ animationAppear?: boolean | {
 validateDragOrderOnEnd?: (source: CellAddress, target: CellAddress) => boolean;
 ```
 
+#${prefix} canvas(HTMLCanvasElement)
+
+表格的 canvas 元素。默认不需要配置，如果需要表格在已经存在的 canvas 中渲染，需要配置该属性。
+
+#${prefix} viewBox({x1: number, y1: number, x2: number, y2: number})
+
+表格在 canvas 中的位置和大小。只有在配置了 canvas 属性后，才需要配置该属性。
+
+#${prefix} disableInteraction(boolean) = false
+
+是否禁用表格所有交互。
+
+#${prefix} defaultCursor(string) = 'default'
+
+默认的鼠标样式。
+
+```
+defaultCursor?: 'default' | 'cell' | 'pointer' | 'text' | 'wait' | 'help' | 'crosshair' | 'not-allowed';
+```

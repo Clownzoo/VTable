@@ -11,8 +11,10 @@
    * 更新options 目前只支持全量更新
    * @param options
    */
-  updateOption(options: BaseTableConstructorOptions) => void
+  updateOption(options: BaseTableConstructorOptions, updateConfig?: { clearColWidthCache?: boolean; clearRowHeightCache?: boolean }) => void
 ```
+
+updateConfig 可以对更新配置项进行控制，默认情况下会清除列宽缓存和行高缓存，如果不需要清除缓存，可以传入{ clearColWidthCache: false, clearRowHeightCache: false }。
 
 如果需要更新单个配置项，请参考下面其他`update**`接口
 
@@ -126,19 +128,196 @@ tableInstance.renderWithRecreateCells();
 
 ## on(Function)
 
-监听事件
+监听表格事件，当指定事件触发时执行回调函数。
+
+```ts
+/**
+ * 监听事件
+ * @param type 事件类型，可选值参考 TABLE_EVENT_TYPE
+ * @param listener 事件监听器函数
+ * @returns 事件监听器ID，可用于off方法移除监听
+ */
+on<TYPE extends keyof TableEventHandlersEventArgumentMap>(
+  type: TYPE,
+  listener: TableEventListener<TYPE>
+): EventListenerId
+```
+
+**参数说明：**
+
+- `type`: 事件类型，如 `'click_cell'`, `'scroll'`, `'selected_cell'` 等
+- `listener`: 事件处理函数，接收事件参数对象
+
+**使用示例：**
+
+```javascript
+// 监听单元格点击事件
+const listenerId = tableInstance.on('click_cell', event => {
+  console.log('点击的单元格：', event.col, event.row);
+  console.log('单元格数据：', event.value);
+});
+
+// 监听滚动事件
+tableInstance.on('scroll', event => {
+  console.log('滚动位置：', event.scrollLeft, event.scrollTop);
+});
+
+// 监听选中状态变化
+tableInstance.on('selected_cell', event => {
+  console.log('选中的单元格范围：', event.ranges);
+});
+```
+
+**常用事件类型：**
+
+- `click_cell`: 单元格点击事件
+- `dblclick_cell`: 单元格双击事件
+- `scroll`: 表格滚动事件
+- `selected_cell`: 单元格选中事件
+- `selected_clear`: 清除选中事件
+- `resize_column`: 列宽调整事件
+- `resize_row`: 行高调整事件
+
+**事件参数说明：**
+
+- `click_cell` 事件参数: `{ col: number, row: number, value: any, event: MouseEvent }`
+- `scroll` 事件参数: `{ scrollLeft: number, scrollTop: number, event: WheelEvent }`
+- `selected_cell` 事件参数: `{ ranges: CellRange[], cells: CellAddress[] }`
 
 ## off(Function)
 
-解除监听事件
+解除监听事件，支持两种方式：通过监听器 ID 或事件类型+监听器函数。
+
+```ts
+/**
+ * 解除监听事件
+ * @param id 事件监听器ID（on方法返回的ID）
+ */
+off(id: EventListenerId): void;
+
+/**
+ * 解除监听事件
+ * @param type 事件类型
+ * @param listener 事件监听器函数
+ */
+off(type: string, listener: TableEventListener): void;
+```
+
+**参数说明：**
+
+- `id`: 通过 on 方法返回的监听器 ID
+- `type`: 事件类型（与 on 方法中的 type 参数对应）
+- `listener`: 要移除的事件处理函数
+
+**使用示例：**
+
+```javascript
+// 方式1：通过监听器ID移除
+const listenerId = tableInstance.on('click_cell', handleClick);
+tableInstance.off(listenerId);
+
+// 方式2：通过事件类型和函数移除
+function handleClick(event) {
+  console.log('单元格被点击');
+}
+tableInstance.on('click_cell', handleClick);
+tableInstance.off('click_cell', handleClick);
+
+// 移除所有指定类型的事件监听器
+function handleScroll1(event) {
+  /* ... */
+}
+function handleScroll2(event) {
+  /* ... */
+}
+tableInstance.on('scroll', handleScroll1);
+tableInstance.on('scroll', handleScroll2);
+// 需要分别移除每个监听器
+tableInstance.off('scroll', handleScroll1);
+tableInstance.off('scroll', handleScroll2);
+```
 
 ## onVChartEvent(Function)
 
-监听 VChart 图表事件
+监听 VChart 图表事件，用于监听表格中嵌入的图表组件事件。
+
+```ts
+/**
+ * 监听VChart图表事件
+ * @param type 图表事件类型，如 'mouseover', 'click' 等
+ * @param callback 事件处理函数
+ */
+onVChartEvent(type: string, callback: AnyFunction): void;
+
+/**
+ * 监听VChart图表事件（带查询条件）
+ * @param type 图表事件类型
+ * @param query 查询条件对象，用于筛选特定图表元素
+ * @param callback 事件处理函数
+ */
+onVChartEvent(type: string, query: any, callback: AnyFunction): void;
+```
+
+**参数说明：**
+
+- `type`: 图表事件类型，如 `'mouseover'`, `'click'`, `'legend_item_click'` 等
+- `query`: 可选的查询条件，用于筛选特定的图表元素（如特定的系列、维度等）
+- `callback`: 事件处理函数，接收图表事件参数
+
+**使用示例：**
+
+```javascript
+// 监听图表鼠标悬停事件
+tableInstance.onVChartEvent('mouseover', event => {
+  console.log('鼠标悬停在图表上:', event);
+});
+
+// 监听特定系列的点击事件
+tableInstance.onVChartEvent('click', { seriesId: 'series1' }, event => {
+  console.log('点击了series1:', event.data);
+});
+
+// 监听图例项点击事件
+tableInstance.onVChartEvent('legend_item_click', event => {
+  console.log('图例项被点击:', event.item);
+});
+```
 
 ## offVChartEvent(Function)
 
-解除监听 VChart 图表事件
+解除监听 VChart 图表事件。
+
+```ts
+/**
+ * 解除VChart图表事件监听
+ * @param type 图表事件类型
+ * @param callback 要移除的事件处理函数（可选）
+ */
+offVChartEvent(type: string, callback?: AnyFunction): void;
+```
+
+**参数说明：**
+
+- `type`: 图表事件类型
+- `callback`: 要移除的具体事件处理函数。如果不传，则移除该类型下的所有监听器
+
+**使用示例：**
+
+```javascript
+// 定义事件处理函数
+function handleChartClick(event) {
+  console.log('图表被点击:', event);
+}
+
+// 添加监听
+tableInstance.onVChartEvent('click', handleChartClick);
+
+// 移除指定监听函数
+tableInstance.offVChartEvent('click', handleChartClick);
+
+// 移除某类型的所有监听函数
+tableInstance.offVChartEvent('mouseover');
+```
 
 ## setRecords(Function)
 
@@ -196,25 +375,41 @@ setRecords(records: Array<any>)
 
 ## getDrawRange(Function)
 
-获取表格实际绘制内容区域的 boundRect 的值
-如
+获取表格实际绘制内容区域的 boundRect 的值，返回表格内容在画布上的实际位置和尺寸信息。
 
+```ts
+/**
+ * 获取表格实际绘制内容区域的boundRect值
+ * @returns 返回包含边界信息的对象
+ */
+getDrawRange(): Rect
 ```
+
+**返回值说明：**
+返回一个包含边界信息的对象，结构如下：
+
+```javascript
 {
     "bounds": {
-        "x1": 1,
-        "y1": 1,
-        "x2": 1581,
-        "y2": 361
+        "x1": 1,      // 左边界坐标
+        "y1": 1,      // 上边界坐标
+        "x2": 1581,   // 右边界坐标
+        "y2": 361     // 下边界坐标
     },
-    bottom: 361,
-    height: 360,
-    left: 1，
-    right: 1581，
-    top: 1,
-    width: 1580
+    left: 1,      // 左边界
+    top: 1,       // 上边界
+    right: 1581,  // 右边界
+    bottom: 361,  // 下边界
+    width: 1580,  // 内容宽度
+    height: 360   // 内容高度
 }
 ```
+
+**使用场景：**
+
+- 获取表格内容的确切位置和尺寸
+- 计算表格内容在画布上的布局
+- 用于自定义绘制或覆盖层的定位
 
 ## selectCell(Function)
 
@@ -248,6 +443,76 @@ setRecords(records: Array<any>)
 其中：
 {{ use: CellRange() }}
 
+## selectRow(Function)
+
+选中整行，支持单选、多选和范围选择模式。
+
+```ts
+/**
+ * 选中整行
+ * @param rowIndex 行索引（从0开始）
+ * @param isCtrl 是否按住Ctrl键，用于多选模式
+ * @param isShift 是否按住Shift键，用于范围选择模式
+ */
+selectRow(rowIndex: number, isCtrl?: boolean, isShift?: boolean): void
+```
+
+**参数说明：**
+
+- `rowIndex`: 要选中的行索引，从 0 开始
+- `isCtrl`: 是否使用 Ctrl 键多选模式。为 true 时，保留之前的选择并添加新行
+- `isShift`: 是否使用 Shift 键范围选择模式。为 true 时，从上次选择扩展到当前行
+
+**使用示例：**
+
+```javascript
+// 单选一行（会清除之前的选择）
+tableInstance.selectRow(2);
+
+// Ctrl+点击效果：多选行
+tableInstance.selectRow(2, true); // 选中第3行
+tableInstance.selectRow(5, true); // 保持第3行选中，同时选中第6行
+
+// Shift+点击效果：范围选择
+tableInstance.selectRow(2); // 先选中第3行
+tableInstance.selectRow(5, false, true); // 选中第3行到第6行的所有行
+```
+
+## selectCol(Function)
+
+选中整列，支持单选、多选和范围选择模式。
+
+```ts
+/**
+ * 选中整列
+ * @param colIndex 列索引（从0开始）
+ * @param isCtrl 是否按住Ctrl键，用于多选模式
+ * @param isShift 是否按住Shift键，用于范围选择模式
+ */
+selectCol(colIndex: number, isCtrl?: boolean, isShift?: boolean): void
+```
+
+**参数说明：**
+
+- `colIndex`: 要选中的列索引，从 0 开始
+- `isCtrl`: 是否使用 Ctrl 键多选模式。为 true 时，保留之前的选择并添加新列
+- `isShift`: 是否使用 Shift 键范围选择模式。为 true 时，从上次选择扩展到当前列
+
+**使用示例：**
+
+```javascript
+// 单选一列（会清除之前的选择）
+tableInstance.selectCol(1);
+
+// Ctrl+点击效果：多选列
+tableInstance.selectCol(1, true); // 选中第2列
+tableInstance.selectCol(3, true); // 保持第2列选中，同时选中第4列
+
+// Shift+点击效果：范围选择
+tableInstance.selectCol(1); // 先选中第2列
+tableInstance.selectCol(3, false, true); // 选中第2列到第4列的所有列
+```
+
 ## getSelectedCellInfos(Function)
 
 获取已选中的单元格信息，返回结果是二维数组，第一层数组项代表一行，第二层数组每一项即代表该行的一个单元格信息。
@@ -261,7 +526,35 @@ setRecords(records: Array<any>)
 
 ## clearSelected(Function)
 
-清除所有单元格的选中状态。
+清除所有单元格的选中状态，等同于调用 `selectCell()` 不传参数。
+
+```ts
+/**
+ * 清除所有单元格的选中状态
+ */
+clearSelected(): void
+```
+
+**使用示例：**
+
+```javascript
+// 选中一些单元格
+tableInstance.selectCell(2, 3);
+tableInstance.selectRow(5, true);
+
+// 清除所有选中状态
+tableInstance.clearSelected();
+
+// 验证是否已清除
+const selectedInfos = tableInstance.getSelectedCellInfos();
+console.log(selectedInfos); // null
+```
+
+**相关方法：**
+
+- `selectCell()`: 选中单个单元格
+- `selectCells()`: 选中多个单元格区域
+- `getSelectedCellInfos()`: 获取当前选中的单元格信息
 
 ## getBodyColumnDefine(Function)
 
@@ -281,63 +574,238 @@ setRecords(records: Array<any>)
 
 ## getCellValue(Function)
 
-获取单元格展示值，如果在 customMergeCell 函数中使用，需要传入 skipCustomMerge 参数，否则会导致报错。
+获取单元格展示值，返回格式化后的显示值。如果在 customMergeCell 函数中使用，需要传入 skipCustomMerge 参数，否则会导致报错。
 
+```ts
+/**
+ * 获取单元格展示值
+ * @param col 列索引（从0开始）
+ * @param row 行索引（从0开始）
+ * @param skipCustomMerge 是否跳过自定义合并单元格逻辑，默认为false
+ * @returns 返回格式化后的单元格显示值
+ */
+getCellValue(col: number, row: number, skipCustomMerge?: boolean): FieldData;
 ```
-  /**
-   * 获取单元格展示值
-   */
-  getCellValue(col: number, row: number, skipCustomMerge?: boolean): FieldData;
+
+**参数说明：**
+
+- `col`: 列索引，从 0 开始计数
+- `row`: 行索引，从 0 开始计数
+- `skipCustomMerge`: 是否跳过自定义合并单元格逻辑，在 customMergeCell 函数中使用时需要设置为 true
+
+**返回值说明：**
+
+- 返回格式化后的单元格显示值（字符串或数字）
+- 如果单元格不存在或为空，可能返回 null 或 undefined
+
+**使用示例：**
+
+```javascript
+// 获取第3行第2列的单元格显示值
+const cellValue = tableInstance.getCellValue(1, 2);
+console.log('单元格显示值:', cellValue);
+
+// 在自定义合并单元格函数中使用
+function customMergeCell(col, row) {
+  const value = tableInstance.getCellValue(col, row, true); // 必须传true
+  // ...自定义合并逻辑
+}
 ```
+
+**注意事项：**
+
+- 返回的是经过格式化的显示值，不是原始数据
+- 如需获取原始数据，请使用 getCellOriginValue 或 getCellRawValue 方法
 
 ## getCellOriginValue(Function)
 
-获取单元格展示数据的 format 前的值
+获取单元格展示数据的 format 前的原始值，即未经过格式化函数处理的原始数据值。
 
+```ts
+/**
+ * 获取单元格展示数据的format前的值
+ * @param col 列索引（从0开始）
+ * @param row 行索引（从0开始）
+ * @returns 返回未经格式化的原始数据值
+ */
+getCellOriginValue(col: number, row: number): FieldData;
 ```
-  /**
-   * 获取单元格展示数据的format前的值
-   */
-  getCellOriginValue(col: number, row: number): FieldData;
+
+**参数说明：**
+
+- `col`: 列索引，从 0 开始计数
+- `row`: 行索引，从 0 开始计数
+
+**返回值说明：**
+
+- 返回未经格式化的原始数据值
+- 与 getCellValue()不同，此值未经过列配置中的 format 函数处理
+
+**使用示例：**
+
+```javascript
+// 获取第3行第2列的原始数据值
+const originValue = tableInstance.getCellOriginValue(1, 2);
+console.log('原始数据值:', originValue);
+
+// 对比格式化前后的值
+const displayValue = tableInstance.getCellValue(1, 2); // 格式化后的显示值
+const originValue = tableInstance.getCellOriginValue(1, 2); // 原始数据值
+console.log('显示值:', displayValue, '原始值:', originValue);
 ```
+
+**与相关方法的区别：**
+
+- `getCellValue()`: 返回格式化后的显示值
+- `getCellOriginValue()`: 返回格式化前的原始值
+- `getCellRawValue()`: 返回数据源中最原始的值（包括嵌套数据）
 
 ## getCellRawValue(Function)
 
-获取单元格展示数据源最原始值
+获取单元格展示数据源最原始值，即从数据源 records 中直接获取的未经任何处理的最原始数据。
 
+```ts
+/**
+ * 获取单元格展示数据源最原始值
+ * @param col 列索引（从0开始）
+ * @param row 行索引（从0开始）
+ * @returns 返回数据源中最原始的值
+ */
+getCellRawValue(col: number, row: number): FieldData;
 ```
-  /**
-   * 获取单元格展示数据源最原始值
-   */
-  getCellRawValue(col: number, row: number): FieldData;
+
+**参数说明：**
+
+- `col`: 列索引，从 0 开始计数
+- `row`: 行索引，从 0 开始计数
+
+**返回值说明：**
+
+- 返回从数据源 records 中直接获取的最原始数据
+- 对于嵌套数据结构，返回完整的嵌套对象
+- 不受任何格式化或转换函数影响
+
+**使用示例：**
+
+```javascript
+// 获取第3行第2列的最原始数据值
+const rawValue = tableInstance.getCellRawValue(1, 2);
+console.log('最原始数据值:', rawValue);
+
+// 三种值获取方式的对比
+const displayValue = tableInstance.getCellValue(1, 2); // 格式化显示值: "$1,234.56"
+const originValue = tableInstance.getCellOriginValue(1, 2); // 原始数据值: 1234.56
+const rawValue = tableInstance.getCellRawValue(1, 2); // 最原始值: { price: 1234.56, currency: "USD" }
 ```
+
+**适用场景：**
+
+- 需要访问完整的数据对象结构
+- 进行数据调试和验证
+- 获取嵌套数据对象的特定属性
 
 ## getCellStyle(Function)
 
-获取某个单元格的样式
+获取某个单元格的样式对象，包含该单元格的所有样式属性。
 
 ```ts
- /**
-   * 获取某个单元格的样式 供业务方调用
-   * @param col
-   * @param row
-   */
-  getCellStyle(col: number, row: number) => CellStyle
+/**
+ * 获取某个单元格的样式 供业务方调用
+ * @param col 列索引（从0开始）
+ * @param row 行索引（从0开始）
+ * @returns 返回单元格样式对象
+ */
+getCellStyle(col: number, row: number): CellStyle
 ```
+
+**参数说明：**
+
+- `col`: 列索引，从 0 开始计数
+- `row`: 行索引，从 0 开始计数
+
+**返回值说明：**
+返回一个包含单元格所有样式属性的对象，可能包含：
+
+- `color`: 文字颜色
+- `bgColor`: 背景颜色
+- `fontSize`: 字体大小
+- `fontFamily`: 字体族
+- `textAlign`: 文本对齐方式
+- `textBaseline`: 文本基线
+- `lineHeight`: 行高
+- `fontWeight`: 字体粗细
+- 等其他样式属性
+
+**使用示例：**
+
+```javascript
+// 获取第3行第2列的单元格样式
+const cellStyle = tableInstance.getCellStyle(1, 2);
+console.log('单元格样式:', cellStyle);
+
+// 根据样式做条件判断
+const style = tableInstance.getCellStyle(col, row);
+if (style.bgColor === '#ff0000') {
+  console.log('该单元格背景为红色');
+}
+```
+
+**注意事项：**
+
+- 返回的是计算后的最终样式，包括主题、列配置、单元格自定义样式等的合并结果
+- 如果单元格没有特殊样式，返回默认样式对象
 
 ## getRecordByCell(Function)
 
-获取该单元格的数据项
+根据行列号获取该单元格对应的完整数据记录。对于不同类型的表格，返回的数据结构有所不同。
 
+```ts
+/**
+ * 根据行列号获取整条数据记录
+ * @param col 列索引（从0开始）
+ * @param row 行索引（从0开始）
+ * @return {object} ListTable返回单条记录对象，PivotTable返回记录数组
+ */
+getRecordByCell(col: number, row: row): any | any[]
 ```
-  /**
-   * 根据行列号获取整条数据记录
-   * @param  {number} col col index.
-   * @param  {number} row row index.
-   * @return {object} record in ListTable. return Array<any> in PivotTable.
-   */
-  getRecordByCell(col: number, row: number)
+
+**参数说明：**
+
+- `col`: 列索引，从 0 开始计数
+- `row`: 行索引，从 0 开始计数
+
+**返回值说明：**
+
+- **ListTable**: 返回该单元格对应的单条数据记录（对象）
+- **PivotTable**: 返回该单元格对应的记录数组（因为透视表单元格可能包含多条聚合数据）
+- **表头单元格**: 可能返回 null 或表头相关信息
+
+**使用示例：**
+
+```javascript
+// ListTable示例
+const record = tableInstance.getRecordByCell(1, 2);
+console.log('该单元格的数据记录:', record);
+// 输出: { name: "张三", age: 25, department: "技术部" }
+
+// PivotTable示例
+const records = tableInstance.getRecordByCell(1, 2);
+console.log('该单元格的数据记录数组:', records);
+// 输出: [{ product: "手机", sales: 1000 }, { product: "电脑", sales: 500 }]
+
+// 访问记录中的特定字段
+const record = tableInstance.getRecordByCell(col, row);
+if (record && record.name) {
+  console.log('姓名:', record.name);
+}
 ```
+
+**注意事项：**
+
+- 对于 ListTable，返回的是单条数据对象
+- 对于 PivotTable，返回的是数据数组（因为透视表单元格可能聚合了多条数据）
+- 如果指定的行列号超出范围，可能返回 null 或 undefined
+- 表头单元格返回的数据结构与数据单元格不同
 
 ## getBodyIndexByTableIndex(Function)
 
@@ -596,6 +1064,23 @@ export interface CellAddress {
 
 {{ use: ICellHeaderPaths() }}
 
+## getCellRowHeaderFullPaths(Function)
+
+获取行表头全路径
+
+解决 getCellHeaderPaths 接口在有合并单元格的情况，获取不到正确的行表头路径的问题。
+
+**PivotTable 专有**
+
+```
+  /**
+   * 获取行表头全路径
+   * @param col
+   * @returns
+   */
+  getCellRowHeaderFullPaths(col: number) => IDimensionInfo[]
+```
+
 ## getCellHeaderTreeNodes(Function)
 
 根据行列号获取表头 tree 节点，包含了用户在自定义树 rowTree 及 columnTree 树上的自定义属性（也是内部布局树的节点，获取后请不要随意修改）。一般情况下用 getCellHeaderPaths 即可。
@@ -646,19 +1131,131 @@ export interface CellAddress {
 
 ## getScrollTop(Function)
 
-获取当前竖向滚动位置
+获取当前竖向滚动位置，返回表格内容在垂直方向上的滚动距离。
+
+```ts
+/**
+ * 获取当前竖向滚动位置
+ * @returns 垂直滚动距离（像素值）
+ */
+getScrollTop(): number
+```
+
+**返回值说明：**
+
+- 返回表格内容在垂直方向上的滚动距离，单位为像素
+- 如果表格未发生垂直滚动，返回 0
+
+**使用示例：**
+
+```javascript
+const scrollTop = tableInstance.getScrollTop();
+console.log('当前垂直滚动位置:', scrollTop, 'px');
+
+// 监听滚动事件获取滚动位置
+tableInstance.on('scroll', event => {
+  console.log('垂直滚动位置:', tableInstance.getScrollTop());
+  console.log('水平滚动位置:', tableInstance.getScrollLeft());
+});
+```
 
 ## getScrollLeft(Function)
 
-获取当前横向滚动位置
+获取当前横向滚动位置，返回表格内容在水平方向上的滚动距离。
+
+```ts
+/**
+ * 获取当前横向滚动位置
+ * @returns 水平滚动距离（像素值）
+ */
+getScrollLeft(): number
+```
+
+**返回值说明：**
+
+- 返回表格内容在水平方向上的滚动距离，单位为像素
+- 如果表格未发生水平滚动，返回 0
+
+**使用示例：**
+
+```javascript
+const scrollLeft = tableInstance.getScrollLeft();
+console.log('当前水平滚动位置:', scrollLeft, 'px');
+```
 
 ## setScrollTop(Function)
 
-设置竖向滚动位置 （会更新渲染界面）
+设置竖向滚动位置，会立即更新渲染界面使指定位置的内容显示在可视区域内。
+
+```ts
+/**
+ * 设置竖向滚动位置（会更新渲染界面）
+ * @param scrollTop 垂直滚动距离（像素值）
+ */
+setScrollTop(scrollTop: number): void
+```
+
+**参数说明：**
+
+- `scrollTop`: 要设置的垂直滚动距离，单位为像素
+- 有效值范围：0 到 (表格总高度 - 可视区域高度)
+
+**使用示例：**
+
+```javascript
+// 滚动到顶部
+tableInstance.setScrollTop(0);
+
+// 滚动到指定位置（例如200像素）
+tableInstance.setScrollTop(200);
+
+// 滚动到底部
+const totalHeight = tableInstance.getAllRowsHeight();
+const visibleHeight = tableInstance.getDrawRange().height;
+tableInstance.setScrollTop(totalHeight - visibleHeight);
+```
+
+**注意事项：**
+
+- 设置后会立即更新渲染界面
+- 如果设置的值超出范围，会自动调整到有效范围内
 
 ## setScrollLeft(Function)
 
-设置横向滚动位置（会更新渲染界面）
+设置横向滚动位置，会立即更新渲染界面使指定位置的内容显示在可视区域内。
+
+```ts
+/**
+ * 设置横向滚动位置（会更新渲染界面）
+ * @param scrollLeft 水平滚动距离（像素值）
+ */
+setScrollLeft(scrollLeft: number): void
+```
+
+**参数说明：**
+
+- `scrollLeft`: 要设置的水平滚动距离，单位为像素
+- 有效值范围：0 到 (表格总宽度 - 可视区域宽度)
+
+**使用示例：**
+
+```javascript
+// 滚动到最左侧
+tableInstance.setScrollLeft(0);
+
+// 滚动到指定位置（例如300像素）
+tableInstance.setScrollLeft(300);
+
+// 滚动到最右侧
+const totalWidth = tableInstance.getAllColsWidth();
+const visibleWidth = tableInstance.getDrawRange().width;
+tableInstance.setScrollLeft(totalWidth - visibleWidth);
+```
+
+**注意事项：**
+
+- 设置后会立即更新渲染界面
+- 如果设置的值超出范围，会自动调整到有效范围内
 
 ## scrollToCell(Function)
 
@@ -902,11 +1499,22 @@ updateFilterRules(filterRules: FilterRules) => void
 
 use case: 对于透视图的场景上，点击图例项后 更新过滤规则 来更新图表
 
+透视表 PivotTable 该接口的签名如下：
+
+```
+  /**
+   * 更新数据过滤规则 对应dataConfig中filterRules配置格式
+   * @param filterRules 过滤规则
+   * @param isResetTree 是否重置表头树结构。 当为true时，会重置表头树结构，当为false时，表头树结构维持不变
+   */
+  updateFilterRules(filterRules: FilterRules, isResetTree: boolean = false) => void
+```
+
 ## getFilteredRecords(Function)
 
 获取过滤后的数据
 
-**PivotTable 专有**
+**ListTable、PivotTable 专有**
 
 ## setLegendSelected(Function)
 
@@ -935,39 +1543,160 @@ use case: 对于透视图的场景上，点击图例项后 更新过滤规则 �
 
 ## exportImg(Function)
 
-导出表格中当前可视区域的图片。
+导出表格中当前可视区域的图片，返回 base64 编码的图片字符串。
 
+```ts
+/**
+ * 导出表格中当前可视区域的图片
+ * @returns base64编码的图片字符串
+ */
+exportImg(): string
 ```
-  /**
-   * 导出表格中当前可视区域的图片
-   * @returns base64图片
-   */
-  exportImg(): string
+
+**返回值说明：**
+
+- 返回当前可视区域表格内容的 base64 编码图片字符串
+- 图片格式为 PNG
+- 只包含当前可视区域内的表格内容
+
+**使用示例：**
+
+```javascript
+// 导出当前可视区域的图片
+const base64Image = tableInstance.exportImg();
+console.log('导出的base64图片:', base64Image);
+
+// 创建图片元素显示导出的图片
+const img = document.createElement('img');
+img.src = base64Image;
+document.body.appendChild(img);
+
+// 下载图片
+const link = document.createElement('a');
+link.download = 'table-screenshot.png';
+link.href = base64Image;
+link.click();
 ```
+
+**注意事项：**
+
+- 只导出当前可视区域的内容，不包括滚动隐藏的部分
+- 返回的 base64 字符串可以直接用作图片的 src 属性
+- 图片质量取决于当前表格的渲染设置和像素比
 
 ## exportCellImg(Function)
 
-导出某个单元格图片
+导出指定单元格的图片，可以控制是否包含背景和边框。
 
+```ts
+/**
+ * 导出某个单元格图片
+ * @param col 列索引（从0开始）
+ * @param row 行索引（从0开始）
+ * @param options 导出选项配置
+ * @returns base64编码的图片字符串
+ */
+exportCellImg(col: number, row: number, options?: { disableBackground?: boolean; disableBorder?: boolean }): string
 ```
- /**
-   * 导出某个单元格图片
-   * @returns base64图片
-   */
-  exportCellImg(col: number, row: number, options?: { disableBackground?: boolean; disableBorder?: boolean }): string
+
+**参数说明：**
+
+- `col`: 列索引，从 0 开始计数
+- `row`: 行索引，从 0 开始计数
+- `options`: 可选的导出配置
+  - `disableBackground`: 是否禁用背景，默认为 false
+  - `disableBorder`: 是否禁用边框，默认为 false
+
+**返回值说明：**
+
+- 返回指定单元格的 base64 编码图片字符串
+- 图片格式为 PNG
+
+**使用示例：**
+
+```javascript
+// 导出单个单元格图片（包含背景和边框）
+const cellImage = tableInstance.exportCellImg(1, 2);
+
+// 导出单元格图片（不包含背景）
+const cellImageNoBg = tableInstance.exportCellImg(1, 2, {
+  disableBackground: true
+});
+
+// 导出单元格图片（不包含边框）
+const cellImageNoBorder = tableInstance.exportCellImg(1, 2, {
+  disableBorder: true
+});
+
+// 导出单元格图片（只包含文字内容）
+const cellImageContentOnly = tableInstance.exportCellImg(1, 2, {
+  disableBackground: true,
+  disableBorder: true
+});
 ```
+
+**注意事项：**
+
+- 可以精确控制导出图片的样式元素
+- 适用于需要将单元格内容嵌入到其他文档或报告中的场景
+- 返回的 base64 字符串可以直接用作图片的 src 属性
 
 ## exportCellRangeImg(Function)
 
-导出某一片单元格区域的图片
+导出指定单元格区域的图片，支持导出多个连续单元格组成的矩形区域。
 
+```ts
+/**
+ * 导出某一片区域的图片
+ * @param cellRange 要导出的单元格区域范围
+ * @returns base64编码的图片字符串
+ */
+exportCellRangeImg(cellRange: CellRange): string
 ```
- /**
-   * 导出某一片区域的图片
-   * @returns base64图片
-   */
-  exportCellRangeImg(cellRange: CellRange): string
+
+**参数说明：**
+
+- `cellRange`: 要导出的单元格区域范围，包含起始和结束位置
+  - `start`: 起始单元格位置 `{ col: number, row: number }`
+  - `end`: 结束单元格位置 `{ col: number, row: number }`
+
+**返回值说明：**
+
+- 返回指定单元格区域的 base64 编码图片字符串
+- 图片格式为 PNG
+- 包含区域内所有单元格的内容、样式和边框
+
+**使用示例：**
+
+```javascript
+// 导出从第1行第1列到第3行第4列的区域
+const cellRange = {
+  start: { col: 0, row: 0 }, // 第1行第1列
+  end: { col: 3, row: 2 } // 第3行第4列
+};
+const rangeImage = tableInstance.exportCellRangeImg(cellRange);
+
+// 导出单个单元格（区域起始和结束相同）
+const singleCellRange = {
+  start: { col: 1, row: 2 }, // 第3行第2列
+  end: { col: 1, row: 2 } // 同一个单元格
+};
+const singleCellImage = tableInstance.exportCellRangeImg(singleCellRange);
+
+// 导出整行
+const rowRange = {
+  start: { col: 0, row: 5 }, // 第6行第1列
+  end: { col: tableInstance.colCount - 1, row: 5 } // 第6行最后一列
+};
+const rowImage = tableInstance.exportCellRangeImg(rowRange);
 ```
+
+**注意事项：**
+
+- 区域必须是矩形，由起始和结束位置确定
+- 包含区域内所有单元格的完整样式（背景、边框、文字等）
+- 适用于导出表格的特定部分，如报表、统计区域等
+- 返回的 base64 字符串可以直接用作图片的 src 属性
 
 ## changeCellValue(Function)
 
@@ -1467,6 +2196,15 @@ setLoadingHierarchyState: (col: number, row: number) => void;
 ```
   /** 设置画布的像素比 */
   setPixelRatio: (pixelRatio: number) => void;
+```
+
+## setTranslate(Function)
+
+设置表格的偏移量
+
+```
+  /** 设置表格的偏移量 */
+  setTranslate: (x: number, y: number) => void;
 ```
 
 ## expandAllTreeNode(Function)

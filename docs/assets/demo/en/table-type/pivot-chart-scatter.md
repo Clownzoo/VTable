@@ -1,6 +1,6 @@
 ---
 category: examples
-group: table-type
+group: Pivot Chart
 title: Pivot Chart
 cover: https://lf9-dp-fe-cms-tos.byteorg.com/obj/bit-cloud/VTable/preview/pivot-chart-scatter.png
 link: table_type/pivot_chart
@@ -1349,6 +1349,7 @@ const option = {
   columns: columns,
   indicators,
   records: data,
+  indicatorsAsCol:false,
   defaultRowHeight: 200,
   defaultHeaderRowHeight: 50,
   defaultColWidth: 280,

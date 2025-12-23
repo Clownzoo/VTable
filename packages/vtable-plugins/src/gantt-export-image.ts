@@ -1,4 +1,16 @@
-import * as VTableGantt from '@visactor/vtable-gantt';
+/**
+ * 这个文件提供了甘特图导出功能，但使用了懒加载方式避免强制依赖
+ * 只有在实际使用时才会尝试加载 @visactor/vtable-gantt
+ */
+import { vglobal } from '@visactor/vtable/es/vrender';
+// 使用类型声明而不是直接导入，避免静态依赖
+type Gantt = any;
+interface IGanttPlugin {
+  id: string;
+  name: string;
+  run: (...args: any[]) => void;
+  release?: () => void;
+}
 
 // 甘特图导出配置项接口
 export interface ExportOptions {
@@ -10,18 +22,19 @@ export interface ExportOptions {
   download?: boolean;
 }
 
+
 /**
  * 甘特图导出插件
  * @description 提供完整的甘特图导出功能，支持高分辨率输出和精准布局保留
  */
-export class ExportGanttPlugin implements VTableGantt.plugins.IGanttPlugin {
-  id = 'gantt-export-helper';
+export class ExportGanttPlugin implements IGanttPlugin {
+  id: string = `gantt-export-helper`;
   name = 'Gantt Export Helper';
-  private _gantt: VTableGantt.Gantt | null = null;
+  private _gantt: Gantt | null = null;
 
   // run 方法，在插件初始化时由 PluginManager调用
   run(...args: any[]): void {
-    const ganttInstance = args[0] as VTableGantt.Gantt;
+    const ganttInstance = args[0] as Gantt;
     if (!ganttInstance) {
       console.error('ExportGanttPlugin: Gantt instance not provided to run method.');
       return;
@@ -36,6 +49,7 @@ export class ExportGanttPlugin implements VTableGantt.plugins.IGanttPlugin {
    * @throws {Error} 导出过程中发生错误时抛出异常
    */
   async exportToImage(options: ExportOptions = {}): Promise<string | undefined> {
+
     if (!this._gantt) {
       // 保留这个 error
       console.error('ExportGanttPlugin: Gantt instance not available.');
@@ -52,10 +66,10 @@ export class ExportGanttPlugin implements VTableGantt.plugins.IGanttPlugin {
     } = options;
 
     try {
-      const { tempContainer, clonedGantt } = this.createFullSizeContainer(scale);
+      const { tempContainer, clonedGantt } = await this.createFullSizeContainer(scale);
 
       try {
-        await new Promise(resolve => requestAnimationFrame(resolve));
+        await new Promise(resolve => vglobal.getRequestAnimationFrame()(resolve));
 
         const totalWidth =
           (clonedGantt.taskListTableInstance.getAllColsWidth() + clonedGantt.getAllDateColsWidth()) * scale;
@@ -128,7 +142,7 @@ export class ExportGanttPlugin implements VTableGantt.plugins.IGanttPlugin {
     });
   }
 
-  private createFullSizeContainer(scale: number) {
+  private async createFullSizeContainer(scale: number) {
     if (!this._gantt) {
       // 保留这个 error
       throw new Error('ExportGanttPlugin: Gantt instance not available to create container.');
@@ -151,31 +165,55 @@ export class ExportGanttPlugin implements VTableGantt.plugins.IGanttPlugin {
     clonedContainer.style.height = `${totalHeight}px`;
     tempContainer.appendChild(clonedContainer);
 
-    const clonedGantt = new VTableGantt.Gantt(clonedContainer, {
-      ...this._gantt.options,
-      records: JSON.parse(JSON.stringify(this._gantt.records)),
-      taskListTable: {
-        ...this._gantt.options.taskListTable,
-        tableWidth: undefined as unknown as number,
-        minTableWidth: undefined as unknown as number,
-        maxTableWidth: undefined as unknown as number
-      },
-      plugins: []
-    });
+    try {
+      // 动态导入甘特图组件
+      let GanttClass;
+      try {
+        const module = await import('@visactor/vtable-gantt');
+        GanttClass = module.Gantt;
+        if (!GanttClass) {
+          throw new Error('Gantt class not found in @visactor/vtable-gantt');
+        }
+      } catch (err) {
+        console.error('无法加载甘特图组件:', err);
+        throw new Error(
+          '导出甘特图需要安装并正确加载 @visactor/vtable-gantt 依赖\n' + '请执行: npm install @visactor/vtable-gantt'
+        );
+      }
 
-    clonedGantt.setPixelRatio(scale);
+      const clonedGantt = new GanttClass(clonedContainer, {
+        ...this._gantt.options,
+        records: this._gantt.records,
+        taskListTable: {
+          ...this._gantt.options.taskListTable,
+          tableWidth: undefined as unknown as number,
+          minTableWidth: undefined as unknown as number,
+          maxTableWidth: undefined as unknown as number
+        },
+        plugins: []
+      });
 
-    // 禁用裁剪
-    if ((clonedGantt as any).scenegraph?.ganttGroup) {
-      (clonedGantt as any).scenegraph.ganttGroup.setAttribute('clip', false);
+      clonedGantt.setPixelRatio(scale);
+
+      // 禁用裁剪
+      if ((clonedGantt as any).scenegraph?.ganttGroup) {
+        (clonedGantt as any).scenegraph.ganttGroup.setAttribute('clip', false);
+      }
+      if ((clonedGantt.taskListTableInstance as any)?.scenegraph?.tableGroup) {
+        (clonedGantt.taskListTableInstance as any).scenegraph.tableGroup.setAttribute('clip', false);
+      }
+
+      clonedGantt.scenegraph.stage.render();
+
+      return { tempContainer, clonedGantt };
+    } catch (err) {
+      // 清理创建的DOM元素
+      if (tempContainer && tempContainer.parentNode) {
+        tempContainer.remove();
+      }
+      console.error('无法导入甘特图组件，请确保已安装 @visactor/vtable-gantt 依赖', err);
+      throw new Error('导出甘特图需要安装 @visactor/vtable-gantt 依赖');
     }
-    if ((clonedGantt.taskListTableInstance as any)?.scenegraph?.tableGroup) {
-      (clonedGantt.taskListTableInstance as any).scenegraph.tableGroup.setAttribute('clip', false);
-    }
-
-    clonedGantt.scenegraph.stage.render();
-
-    return { tempContainer, clonedGantt };
   }
   private finalizeExport(
     canvas: HTMLCanvasElement,

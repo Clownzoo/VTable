@@ -140,7 +140,7 @@ export class SimpleHeaderLayoutMap implements LayoutMapAPI {
             title: rowSeriesNumber.title,
             define: merge({ field: '_vtable_rowSeries_number' }, rowSeriesNumber),
             cellType: rowSeriesNumber.cellType ?? 'text',
-            headerType: rowSeriesNumber.cellType === 'checkbox' ? 'checkbox' : 'text',
+            headerType: rowSeriesNumber.headerType ?? (rowSeriesNumber.cellType === 'checkbox' ? 'checkbox' : 'text'),
             style: rowSeriesNumber.style,
             width: rowSeriesNumber.width,
             format: rowSeriesNumber.format,
@@ -1065,14 +1065,14 @@ export class SimpleHeaderLayoutMap implements LayoutMapAPI {
       // 当前节点是展开状态才需要添加子节点
       const expand = !(hd as HeaderData).hierarchyState || (hd as HeaderData).hierarchyState === HierarchyState.expand;
       if (!!hd.columns && !!expand) {
-        const isAllHided = hd.columns.every((c: any) => c.hide);
+        const isAllHided = hd.columns.every((c: any) => c.hide) || hd.hide;
         !isAllHided &&
           this._addHeaders(
             maxRow + 1,
             hd.columns,
             [...roots, id],
             hd.hideColumnsSubHeader || hideColumnsSubHeader,
-            hd.levelSpan
+            (hd as any).levelSpan
           ).forEach(c => results.push(c));
       } else {
         const colDef = {
@@ -1180,12 +1180,13 @@ export class SimpleHeaderLayoutMap implements LayoutMapAPI {
    * @returns boolean 是否可以移动
    */
   canMoveHeaderPosition(source: CellAddress, target: CellAddress): boolean {
+    const dragColumnOrRow = this._table.stateManager.columnMove.movingColumnOrRow;
     if (this.isSeriesNumberInHeader(target.col, target.row) || this.isSeriesNumberInHeader(source.col, source.row)) {
       return false;
     } else if (
       !this.transpose &&
-      this.isSeriesNumberInBody(target.col, target.row) &&
-      this.isSeriesNumberInBody(source.col, source.row)
+      ((this.isSeriesNumberInBody(target.col, target.row) && this.isSeriesNumberInBody(source.col, source.row)) ||
+        dragColumnOrRow === 'row')
     ) {
       // return true;
       const sourceIndex = this.getRecordShowIndexByCell(0, source.row);
@@ -1194,8 +1195,8 @@ export class SimpleHeaderLayoutMap implements LayoutMapAPI {
       return canMove;
     } else if (
       this.transpose &&
-      this.isSeriesNumberInBody(target.col, target.row) &&
-      this.isSeriesNumberInBody(source.col, source.row)
+      ((this.isSeriesNumberInBody(target.col, target.row) && this.isSeriesNumberInBody(source.col, source.row)) ||
+        dragColumnOrRow === 'row')
     ) {
       // 如果是子节点之间相互换位置  则匹配表头最后一级
       if (
@@ -1222,7 +1223,10 @@ export class SimpleHeaderLayoutMap implements LayoutMapAPI {
     // 获取操作单元格的range范围
     const sourceCellRange = this.getCellRange(source.col, source.row);
     // 获取source和target对应sourceCellRange.start.row的headerId
-    if (this.isColumnHeader(source.col, source.row)) {
+    if (
+      this.isColumnHeader(source.col, source.row) ||
+      (this._table.stateManager.columnMove.movingColumnOrRow === 'column' && source.row === 0)
+    ) {
       const sourceTopId = this.getParentCellId(source.col, sourceCellRange.start.row);
       const targetTopId = this.getParentCellId(target.col, sourceCellRange.start.row);
       return sourceTopId === targetTopId;
@@ -1257,7 +1261,10 @@ export class SimpleHeaderLayoutMap implements LayoutMapAPI {
     ) {
       let sourceCellRange = this.getCellRange(source.col, source.row);
       // 对移动列表头 行表头 分别处理
-      if (this.isColumnHeader(source.col, source.row)) {
+      if (
+        this.isColumnHeader(source.col, source.row) ||
+        (this._table.stateManager.columnMove.movingColumnOrRow === 'column' && source.row === 0)
+      ) {
         // source单元格包含的列数
         const sourceSize = sourceCellRange.end.col - sourceCellRange.start.col + 1;
         // 插入目标地址的列index
@@ -1284,21 +1291,57 @@ export class SimpleHeaderLayoutMap implements LayoutMapAPI {
           sourceIds.unshift(targetIndex - this.leftRowSeriesNumberColumnCount, 0);
           Array.prototype.splice.apply(this._headerCellIds[row], sourceIds);
         }
-        //将_columns的列定义调整位置 同调整_headerCellIds逻辑
+        //#region 设置了maintainArrayDataOrder 需要调整数组数据顺序。maintainArrayDataOrder目前仅vtable-sheet使用
+        if (this._table.options.dragOrder?.maintainArrayDataOrder) {
+          for (let j = 0; j < this._table.dataSource.dataSourceObj?.records.length; j++) {
+            const rowRecords = this._table.dataSource.dataSourceObj?.records[j];
+            if (Array.isArray(rowRecords)) {
+              // 如果rowRecords的长度小于targetIndex,需要向rowRecords中添加空数据
+              if (rowRecords.length - 1 < Math.max(targetIndex, source.col)) {
+                rowRecords.push(...Array(Math.max(targetIndex, source.col) - rowRecords.length + 1).fill(undefined));
+              }
+              const sourceData = rowRecords.splice(
+                sourceCellRange.start.col - this.leftRowSeriesNumberColumnCount,
+                sourceSize
+              );
+              sourceData.unshift((targetIndex - this.leftRowSeriesNumberColumnCount) as any, 0 as any);
+              Array.prototype.splice.apply(rowRecords, sourceData);
+            }
+          }
+        }
+        //#endregion
+        // #region 将_columns的列定义调整位置 同调整_headerCellIds逻辑
         const sourceColumns = this._columns.splice(
           sourceCellRange.start.col - this.leftRowSeriesNumberColumnCount,
           sourceSize
         );
         sourceColumns.unshift((targetIndex - this.leftRowSeriesNumberColumnCount) as any, 0 as any);
         Array.prototype.splice.apply(this._columns, sourceColumns);
-
-        // 对表头columnTree调整节点位置
+        //#region 设置了maintainArrayDataOrder 需要调整columnTree中的field值
+        if (this._table.options.dragOrder?.maintainArrayDataOrder) {
+          //重新整理column中的field值
+          for (let i = 0; i < this._columns.length; i++) {
+            this._columns[i].field = i;
+          }
+        }
+        //#endregion
+        //#endregion
+        // #region 对表头columnTree调整节点位置
         this.columnTree.movePosition(
           sourceCellRange.start.row,
           sourceCellRange.start.col - this.leftRowSeriesNumberColumnCount,
           targetIndex - this.leftRowSeriesNumberColumnCount
         );
+        //#region 设置了maintainArrayDataOrder 需要调整columnTree中的field值
+        if (this._table.options.dragOrder?.maintainArrayDataOrder) {
+          //重新整理column中的field值
+          for (let i = 0; i < this.columnTree.tree.children.length; i++) {
+            (this.columnTree.tree.children[i] as any).field = i;
+          }
+        }
+        //#endregion
         this.columnTree.reset(this.columnTree.tree.children);
+        //#endregion
         this._cellRangeMap = new Map();
         return {
           sourceIndex: sourceCellRange.start.col,
@@ -1357,7 +1400,10 @@ export class SimpleHeaderLayoutMap implements LayoutMapAPI {
           targetSize: targetCellRange.end.row - targetCellRange.start.row + 1,
           moveType: 'row'
         };
-      } else if (this.isSeriesNumberInBody(source.col, source.row)) {
+      } else if (
+        this.isSeriesNumberInBody(source.col, source.row) ||
+        this._table.stateManager.columnMove.movingColumnOrRow === 'row'
+      ) {
         return {
           sourceIndex: source.row,
           targetIndex: target.row,

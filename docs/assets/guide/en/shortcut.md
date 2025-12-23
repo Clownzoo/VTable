@@ -11,11 +11,14 @@ In order to facilitate users to operate the form, we provide the following short
 | top      | Same as above                                                                                                                                                                                                                                                                                                             |
 | bottom   | Same as above                                                                                                                                                                                                                                                                                                             |
 | ctrl+c   | The key position is incorrect. This copy is consistent with the browser's shortcut key. <br> To copy the contents of selected cells, you need to enable keyboardOptions.copySelected                                                                                                                                      |
+| ctrl+x   | The key position is incorrect. This cut is consistent with the browser's shortcut key. <br> To cut the contents of selected cells, you need to enable keyboardOptions.cutSelected                                                                                                                                      |
 | ctrl+v   | The key position is not correct, the paste shortcut key is the same as the browser shortcut key. <br> To paste content into a cell, you need to enable keyboardOptions.pasteValueToCell. Paste takes effect only for cells with an editor configured                                                                      |
 | ctrl+a   | Select all, you need to enable keyboardOptions.selectAllOnCtrlA                                                                                                                                                                                                                                                           |
 | shift    | Hold shift and the left mouse button to select cells in a continuous area                                                                                                                                                                                                                                                 |
 | ctrl     | Hold down ctrl and the left mouse button to select multiple areas                                                                                                                                                                                                                                                         |
 | Any key  | can be monitored tableInstance.on('keydown',(args)=>{ })                                                                                                                                                                                                                                                                  |
+
+If the above shortcut key response list does not include the ability you need, you can refer to [Excel Keyboard Interaction Alignment Plugin Usage Description](./plugin/excel-keyboard-alignment).
 
 Related configuration:
 
@@ -31,7 +34,11 @@ keyboardOptions: {
   selectAllOnCtrlA?: boolean | SelectAllOnCtrlAOption;
   /** Shortcut key copy, default false, not enabled*/
   copySelected?: boolean; //This copy is consistent with the browser’s shortcut keys
+  /** Shortcut key cut, default false, not enabled*/
+  cutSelected?: boolean; //This cut is consistent with the browser’s shortcut keys
   /** Shortcut key to paste. Paste content to the specified location (that is, it needs to be selected). Batch paste is supported. Default: false */
   pasteValueToCell?: boolean;// Paste takes effect only for cells with an editor configured
+  /** Whether to show the border of the copied cell, default: false */
+  showCopyCellBorder?: boolean;
 }
 ```

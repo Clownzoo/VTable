@@ -1,10 +1,3 @@
-<!--
- * @Author: lym
- * @Date: 2025-03-03 20:20:37
- * @LastEditors: lym
- * @LastEditTime: 2025-03-04 14:15:45
- * @Description: 渲染式编辑器
--->
 <template>
   <vue-list-table ref="tableRef" :options="option">
     <ListColumn
@@ -13,10 +6,10 @@
       :field="column.field"
       :title="column.title"
       :width="column.width"
-      editor="dynamic-render-editor"
+      :editor="DYNAMIC_RENDER_EDITOR"
       :edit-config="editConfig"
     >
-      <template #edit="{ value, onChange }">
+      <template #edit="{ value, refValue, onChange }">
         <a-date-picker
           v-if="column.field === 'birthday'"
           :default-value="value"
@@ -24,14 +17,7 @@
           :trigger-props="{ 'content-class': 'table-editor-element' }"
           @change="onChange"
         />
-        <a-input
-          v-else
-          :default-value="value"
-          style="width: 100%; height: 100%"
-          allow-clear
-          @input="onChange"
-          @clear="onChange()"
-        />
+        <a-input v-else v-model="refValue.value" style="width: 100%; height: 100%" allow-clear />
       </template>
     </ListColumn>
   </vue-list-table>
@@ -39,7 +25,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { ListColumn } from '../../../../../src';
+import { ListColumn, DYNAMIC_RENDER_EDITOR } from '../../../../../src';
 import { generateMockData } from '../../utils';
 
 const { columns, records } = generateMockData(20);

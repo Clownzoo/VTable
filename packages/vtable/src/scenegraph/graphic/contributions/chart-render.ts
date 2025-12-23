@@ -66,9 +66,9 @@ export class DefaultCanvasChartRender extends BaseRender<Chart> implements IGrap
     const { width = groupAttribute.width, height = groupAttribute.height } = chart.attribute;
     const { table } = chart.getRootNode() as any;
 
-    const { active, cacheCanvas, activeChartInstance } = chart;
+    const { cacheCanvas, activeChartInstance } = chart;
     // console.log('render chart', chart.parent.col, chart.parent.row, viewBox, cacheCanvas);
-    if (!active && cacheCanvas) {
+    if (!activeChartInstance && cacheCanvas) {
       if (isArray(cacheCanvas)) {
         cacheCanvas.forEach(singleCacheCanvas => {
           const { x, y, width, height, canvas } = singleCacheCanvas;
@@ -82,7 +82,7 @@ export class DefaultCanvasChartRender extends BaseRender<Chart> implements IGrap
         const formatResult = table.options.specFormat(chart.attribute.spec, activeChartInstance, chart);
         if (formatResult.needFormatSpec && formatResult.spec) {
           const spec = formatResult.spec;
-          activeChartInstance.updateSpecSync(spec);
+          activeChartInstance.updateSpecSync(spec, false, { reuse: false, morph: false });
           // return;
         }
       }
@@ -122,7 +122,7 @@ export class DefaultCanvasChartRender extends BaseRender<Chart> implements IGrap
         stageMatrix.f
       );
 
-      if (typeof dataId === 'string') {
+      if (typeof dataId === 'string' || typeof dataId === 'number') {
         activeChartInstance.updateDataSync(dataId, data ?? []);
       } else {
         const dataBatch = [];

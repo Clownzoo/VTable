@@ -1,3 +1,457 @@
+# v1.22.8
+
+2025-12-17
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable-sheet**: vtable-sheet 支持跨表格计算公式
+- **@visactor/vtable-sheet**: vtable-sheet 支持从 excel 文件中导入多个表格
+- **@visactor/vtable**: vtable 支持导出多个sheet到excel文件
+- **@visactor/vtable-plugins**: 过滤插件支持更新样式 api. close[#4790](https://github.com/VisActor/VTable/issues/4790)
+- **@visactor/vtable-plugins**: 过滤插件支持自定义样式. close[#4720](https://github.com/VisActor/VTable/issues/4720)
+- **@visactor/vtable-plugins**: 过滤菜单隐藏或显示时触发事件. close[#4784](https://github.com/VisActor/VTable/issues/4784)
+
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 透视表设置 grid-tree 小计值不显示 [#4815](https://github.com/VisActor/VTable/issues/4815)
+- **@visactor/vtable**: 更新选项时滚动条错误
+- **@visactor/vtable**: 过滤开关启用错误. fix[#4783](https://github.com/VisActor/VTable/issues/4783)
+- **@visactor/vtable**: 更新表格数据后应用过滤. fix[#4785](https://github.com/VisActor/VTable/issues/4785)
+- **@visactor/vtable**: 更新表格数据后更新过滤状态和键. fix[#4787](https://github.com/VisActor/VTable/issues/4787)
+- **@visactor/vtable**: 选择 none 不生效. fix[#4792](https://github.com/VisActor/VTable/issues/4792)
+- **@visactor/vtable**: 更新表格数据后更新复选框状态. fix[#4795](https://github.com/VisActor/VTable/issues/4795)
+- **@visactor/vtable**: 删除键下不应完成编辑单元格
+- **@visactor/vtable**: 透视图联动 getAxis 节点错误
+- **@visactor/vtable**: 按下回车键时面板隐藏. fix[#4813](https://github.com/VisActor/VTable/issues/4813)
+
+**📖 文档更新**
+
+- **@visactor/vtable**: 补充 chartDimensionLinkage 示例
+
+
+
+[更多详情请查看 v1.22.8](https://github.com/VisActor/VTable/releases/tag/v1.22.8)
+
+# v1.22.7
+
+2025-12-08
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable**: 调整列宽resize支持设置canResizeColumn函数 [#4764](https://github.com/VisActor/VTable/issues/4764)
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 透视图轴配置zero和range矛盾问题修复
+
+**🔨 功能重构**
+
+- **@visactor/vtable**: 优化透视图tooltip联动效果
+- **@visactor/vtable-plugins**: 当表格记录变化时过滤插件自动更新筛选项
+
+
+
+[更多详情请查看 v1.22.7](https://github.com/VisActor/VTable/releases/tag/v1.22.7)
+
+# v1.22.6
+
+2025-12-02
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable-sheet**: 支持复制公式到粘贴单元格
+- **@visactor/vtable-sheet**: 支持公式利用填充柄自动填充
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复excel键盘插件删除和退格键不生效问题
+- **@visactor/vtable**: 透视表修复行/列维度中区分空值和空字符串值
+- **@visactor/vtable-plugins**: 修复点击过滤插件时无法正常打开的问题 [#4736](https://github.com/VisActor/VTable/issues/4736)
+- **@visactor/vtable-plugins**: 修复过滤插件显示时搜索输入框值不清空的问题 [#4736](https://github.com/VisActor/VTable/issues/4736)
+
+
+
+[更多详情请查看 v1.22.6](https://github.com/VisActor/VTable/releases/tag/v1.22.6)
+
+# v1.22.5
+
+2025-11-26
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable**: 支持透视图右侧轴配置 [#4723](https://github.com/VisActor/VTable/issues/4723)
+- **@visactor/vtable**: 支持透视图维度联动配置
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复matchDimensionPath方法中nodeChildren为空检查
+
+
+
+[更多详情请查看 v1.22.5](https://github.com/VisActor/VTable/releases/tag/v1.22.5)
+
+# v1.22.4
+
+2025-11-18
+
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复getCellAdressByHeaderPath匹配算法回溯问题 [#4680](https://github.com/VisActor/VTable/issues/4680)
+- **pivot-table**: 修复冻结列数设置为0时的无效问题 [#4680](https://github.com/VisActor/VTable/issues/4680)
+- **@visactor/vtable**: 修复序列号无法编辑问题 [#4627](https://github.com/VisActor/VTable/issues/4627)
+
+**🔨 功能重构**
+
+- **@visactor/vtable**: 过滤插件优化filterState变化接口
+- **@visactor/vtable-plugins**: 主从表插件展开收起配置优化
+
+
+
+[更多详情请查看 v1.22.4](https://github.com/VisActor/VTable/releases/tag/v1.22.4)
+
+# v1.22.3
+
+2025-11-07
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable-sheet**: 新增 dragOrder 配置，支持拖拽行或列顺序
+- **@visactor/vtable**: 新增 api getCellRowHeaderFullPaths 方法，支持获取透视表单元格的行表头完整路径
+- **@visactor/vtable**: 在透视图中支持 boxPlot 图表类型
+
+**🐛 功能修复**
+
+- **@visactor/vtable-sheet**: 修复拖拽列位置问题 [#4645](https://github.com/VisActor/VTable/issues/4645)
+- **@visactor/vtable**: 修复左上角渲染边框线问题 [#4677](https://github.com/VisActor/VTable/issues/4677)
+- **@visactor/vtable**: 修复 vue-vtable 的 getTargetGroup 方法 [#4663](https://github.com/VisActor/VTable/issues/4663)
+
+**🔨 功能重构**
+
+- **@visactor/vtable**: 优化 overscrollBehavior 设置为 none 交互效果 [#4675](https://github.com/VisActor/VTable/issues/4675)
+
+
+
+[更多详情请查看 v1.22.3](https://github.com/VisActor/VTable/releases/tag/v1.22.3)
+
+# v1.22.2
+
+2025-10-29
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable-sheet**: 新增拖拽行或列顺序功能
+- **@visactor/vtable-sheet**: 新增拖拽列顺序功能，支持更新和计算公式
+- **@visactor/vtable-sheet**: 新增删除或添加行和列后调整公式依赖关系功能
+- **@visactor/vtable**: 新增 refValue 参数，支持 vue-vtable 动态渲染编辑时使用 v-model [#4597](https://github.com/VisActor/VTable/issues/4597)
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 拖拽行顺序更新 rowHeightMap
+- **@visactor/vtable**: 使用行系列编号合并单元格时选择状态错误
+- **@visactor/vtable**: 调整列宽后图例标题位置错误 [#4629](https://github.com/VisActor/VTable/issues/4629)
+- **@visactor/vtable**: 修复透视图标记线布局问题
+- **@visactor/vtable**: 修复表格容器调整大小事件问题 [#4558](https://github.com/VisActor/VTable/issues/4558)
+- **@visactor/vtable**: 修复 vue-vtable 动态渲染编辑问题 [#4621](https://github.com/VisActor/VTable/issues/4621)
+
+**🔨 功能重构**
+
+- **@visactor/vtable**: 优化宽度自适应模式计算逻辑
+- **@visactor/vtable**: 使用 vrender api 替换 requestAnimationFrame [#4619](https://github.com/VisActor/VTable/issues/4619)
+- **@visactor/vtable-sheet**: 支持小写字母公式上下文 [#4628](https://github.com/VisActor/VTable/issues/4628)
+
+
+[更多详情请查看 v1.22.2](https://github.com/VisActor/VTable/releases/tag/v1.22.2)
+
+# v1.22.0
+
+2025-10-17
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable-plugins**: 新增主从表能力的插件
+- **@visactor/vtable-sheet**: 针对新增或删除行和列的情况，优化处理公式计算
+- **@visactor/vtable**: 新增getFilteredRecords方法到ListTable [#4537](https://github.com/VisActor/VTable/issues/4537)
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复PivotTable的getFilteredRecords方法 [#4537](https://github.com/VisActor/VTable/issues/4537)
+- **@visactor/vtable**: 修复HighlightHeaderWhenSelectCellPlugin插件的options解析问题
+
+
+
+[更多详情请查看 v1.22.0](https://github.com/VisActor/VTable/releases/tag/v1.22.0)
+
+# v1.21.1
+
+2025-10-14
+
+
+**🐛 功能修复**
+
+- **@visactor/vtable-gantt**: 修复甘特图缩放轴组件及时释放问题
+
+
+
+[更多详情请查看 v1.21.1](https://github.com/VisActor/VTable/releases/tag/v1.21.1)
+
+# v1.21.0
+
+2025-10-13
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable-gantt**: 甘特图新增缩放zoom交互功能
+
+**🐛 功能优化**
+
+- **@visactor/vtable**: 优化PivotTable的updateFilterRules方法新增isResetTree参数 [#4450](https://github.com/VisActor/VTable/issues/4450)
+
+
+
+[更多详情请查看 v1.21.0](https://github.com/VisActor/VTable/releases/tag/v1.21.0)
+
+# v1.20.3
+
+2025-10-11
+
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复粘贴 HTML 到单元格失效的问题 [#4551](https://github.com/VisActor/VTable/issues/4551)
+- **@visactor/vtable**: 修复使用键盘方向键 arrowUp 和 arrowDown 选择公式项项的问题
+- **@visactor/vtable**: 修复配置 rightFrozenColCount 时双击使右侧冻结列自动列宽分割线未更新问题 [#4526](https://github.com/VisActor/VTable/issues/4526)
+
+
+
+[更多详情请查看 v1.20.3](https://github.com/VisActor/VTable/releases/tag/v1.20.3)
+
+# v1.20.2
+
+2025-10-09
+
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 重构 vtable-plugins 和 vtable-sheet 组件的 UMD 构建产物
+- **@visactor/vtable**: 搜索组件clear方法问题修复 [#4476](https://github.com/VisActor/VTable/issues/4476)
+- **@visactor/vtable-sheet**: 编辑表格组件使用键盘选择公式选择项后enter，arrow键不生效问题修复
+
+**📖 文档更新**
+
+- **@visactor/vtable**: vtable sheet UMD 导入指南
+
+
+
+[更多详情请查看 v1.20.2](https://github.com/VisActor/VTable/releases/tag/v1.20.2)
+
+# v1.20.1
+
+2025-09-26
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable**: 透视图扩展图表类型
+- **@visactor/vtable**: 支持在选取vchart时使用detailPath，添加detectPickChartItem配置
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复调用deleteRecord和renderWidthCreateCells api，switchState错误 [#4436](https://github.com/VisActor/VTable/issues/4436)
+- **@visactor/vtable**: 修复设置浏览器缩放时maxfrozenwidth不生效 [#4494](https://github.com/VisActor/VTable/issues/4494)
+- **@visactor/vtable-gantt**: 修复甘特图网格线样式linedash不生效 [#4495](https://github.com/VisActor/VTable/issues/4495)
+- **@visactor/vtable**: 修复updateOption时更改enablecheckboxcascade不生效 [#4499](https://github.com/VisActor/VTable/issues/4499)
+- **@visactor/vtable**: 修复api selectCells在ctrlMultiSelect为false时不生效
+- **@visactor/vtable**: 修复分页时行顺序更改不生效
+
+
+
+[更多详情请查看 v1.20.1](https://github.com/VisActor/VTable/releases/tag/v1.20.1)
+
+# v1.20.0
+
+2025-09-22
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable-sheet**: 新增vtable-sheet组件
+- **@visactor/vtable**: 新增 keyboardOption.cutSelected配置
+
+**🔧 项目配置**
+
+- **@visactor/vtable**: 更新vrender版本至1.0.16
+
+
+[更多详情请查看 v1.20.0](https://github.com/VisActor/VTable/releases/tag/v1.20.0)
+
+# v1.19.9
+
+2025-09-12
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable**: 添加 disableSelectOnContextMenu 配置项
+- **@visactor/vtable-gantt**: 甘特图任务条进度百分比可调整
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 添加 isReleased 检查，增强健壮性
+- **@visactor/vtable**: 修复填充句柄不显示的错误 [#4376](https://github.com/VisActor/VTable/issues/4376)
+
+**🔨 功能重构**
+
+- **@visactor/vtable**: 优化在 Windows 系统上的库构建流程
+
+
+
+[更多详情请查看 v1.19.9](https://github.com/VisActor/VTable/releases/tag/v1.19.9)
+
+# v1.19.8
+
+2025-08-29
+
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复 getLayoutRowTree api 错误 [#4346](https://github.com/VisActor/VTable/issues/4346)
+- **@visactor/vtable**: 修复当有多列展开时 columnTree 场景图节点 y 值错误 [#4357](https://github.com/VisActor/VTable/issues/4357)
+- **@visactor/vtable**: 当数据透视表仅有指标无维度时 columnWidthConfig 不生效 [#4388](https://github.com/VisActor/VTable/issues/4388)
+
+**🔨 功能重构**
+
+- **@visactor/vtable**: 补充 contextmenu-click 事件参数 [#4364](https://github.com/VisActor/VTable/issues/4364)
+
+
+
+[更多详情请查看 v1.19.8](https://github.com/VisActor/VTable/releases/tag/v1.19.8)
+
+# v1.19.7
+
+2025-08-19
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable**: 新增 ignoreFrozenCols 配置，用于设置冻结列的样式
+- **@visactor/vtable**: 新增 CONTEXTMENU_CANVAS 事件类型
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复当设置隐藏列时，带有子列的列报错的问题 [#4223](https://github.com/VisActor/VTable/issues/4223)
+- **@visactor/vtable**: 修复甘特图刷新容器大小的问题 [#4319](https://github.com/VisActor/VTable/issues/4319)
+- **@visactor/vtable**: 修复当使用 InputEditor 更新 groupBy 配置时，同步组折叠状态时报错的问题 [#4216](https://github.com/VisActor/VTable/issues/4216)
+
+**🔨 功能重构**
+
+- **@visactor/vtable**: 当记录较少时，不需要显示滚动条时，滚动条不显示
+
+[更多详情请查看 v1.19.7](https://github.com/VisActor/VTable/releases/tag/v1.19.7)
+
+# v1.19.6
+
+2025-08-08
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable**: 透视图pivot chart 添加 columnWidthConfig 配置
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复透视图设置 columnHierarchyType 为 gird 时展开树时报错 [#4254](https://github.com/VisActor/VTable/issues/4254)
+- **@visactor/vtable-gantt**: 修复当没有数据records时markline渲染错误 [#4305](https://github.com/VisActor/VTable/issues/4305)
+
+**🔨 功能重构**
+
+- **@visactor/vtable**: 添加表格导出插件
+
+
+
+[更多详情请查看 v1.19.6](https://github.com/VisActor/VTable/releases/tag/v1.19.6)
+
+# v1.19.5
+
+2025-07-31
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable**: 新增 enableHeaderCheckboxCascade option
+- **@visactor/vtable-gantt**:  甘特图组件新增 move_end_task_bar 事件.[#4266](https://github.com/VisActor/VTable/issues/4266)
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复setCellCheckboxState 在tree列设置无效的问题
+
+**🔨 功能重构**
+
+- **@visactor/vtable**: 删除和添加数据时同步更新复选框状态checkstate [#4240](https://github.com/VisActor/VTable/issues/4240)
+
+
+
+[更多详情请查看 v1.19.5](https://github.com/VisActor/VTable/releases/tag/v1.19.5)
+
+# v1.19.4
+
+2025-07-28
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable**: rowSeriesNumber 支持配置field 对应record中字段 [#3902](https://github.com/VisActor/VTable/issues/3902)
+- **@visactor/vtable**: 添加 enableCheckboxCascade 选项 可以取消checkbox级联 [#4130](https://github.com/VisActor/VTable/issues/4130)
+- **@visactor/vtable**: 添加 groupConfig 替代 groupBy 和 group** & 添加 titleCheckbox [#4130](https://github.com/VisActor/VTable/issues/4130)
+- **@visactor/vtable**: 添加 getRecordHierarchyState 接口，并修复更改表头位置参数 [#4226](https://github.com/VisActor/VTable/issues/4226)
+- **@visactor/vtable**: 添加 paste-add-row 插件以支持扩展行数或列数
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复vchart透明背景颜色覆盖掉单元格悬停颜色问题 [#4245](https://github.com/VisActor/VTable/issues/4245)
+- **@visactor/vtable**: 修复透视表中加载图标更新问题 [#4236](https://github.com/VisActor/VTable/issues/4236)
+
+**🔨 功能重构**
+
+- **@visactor/vtable**: 更新合并单元格性能 [#3293](https://github.com/VisActor/VTable/issues/3293)
+- **@visactor/vtable**: 滚动时隐藏菜单列表 [#4214](https://github.com/VisActor/VTable/issues/4214)
+
+
+[更多详情请查看 v1.19.4](https://github.com/VisActor/VTable/releases/tag/v1.19.4)
+
+# v1.19.3
+
+2025-07-09
+
+
+**🆕 新增功能**
+
+- **@visactor/vtable**: 添加 eventOptions.contextmenuReturnAllSelectedCells [#4064](https://github.com/VisActor/VTable/issues/4064)
+-  **@visactor/vtable**: 添加批量展开或折叠所有树节点
+
+**🐛 功能修复**
+
+- **@visactor/vtable**: 修复在使用groupBy时单击触发编辑单元格无效的问题 [#4172](https://github.com/VisActor/VTable/issues/4172)
+- **@visactor/vtable**: 修复粘贴单元格时的validateCellVaule问题 [#4174](https://github.com/VisActor/VTable/issues/4174) [#1797](https://github.com/VisActor/VTable/issues/1797)
+- **@visactor/vtable**: 修复容器resize后冻结列样式不可见问题
+-  **@visactor/vtable**: 修复粘贴validateValue缺少position表参数 [#4164](https://github.com/VisActor/VTable/issues/4164)
+-  **@visactor/vtable**: 修复动画注册进度问题
+-  **@visactor/vtable**: 修复：修复调整容器大小后冻结列不可见的问题 [#3836](https://github.com/VisActor/VTable/issues/3836)
+
+
+
+
+[更多详情请查看 v1.19.3](https://github.com/VisActor/VTable/releases/tag/v1.19.3)
+
 # v1.19.2
 
 2025-07-01

@@ -12,7 +12,8 @@ import type {
   MenuListItem,
   PivotTableAPI,
   SortOrder,
-  SortState
+  SortState,
+  CustomSelectionStyle
 } from '../ts-types';
 import { HighlightScope, InteractionState, SortType } from '../ts-types';
 import { IconFuncTypeEnum } from '../ts-types';
@@ -54,13 +55,6 @@ import type { ColumnData } from '../ts-types/list-table/layout-map/api';
 import { addCustomSelectRanges, deletaCustomSelectRanges } from './select/custom-select';
 import { expendCellRange } from '../tools/merge-range';
 
-export type CustomSelectionStyle = {
-  cellBorderColor?: string; //边框颜色
-  cellBorderLineWidth?: number; //边框线宽度
-  cellBorderLineDash?: number[]; //边框线虚线
-  cellBgColor?: string; //选择框背景颜色
-};
-
 export class StateManager {
   table: BaseTableAPI;
   /**
@@ -75,6 +69,8 @@ export class StateManager {
   interactionStateBeforeScroll?: InteractionState;
   // select记录两个位置，第二个位置只在range模式生效
   select: {
+    isSelectAll?: boolean;
+    selectInline?: 'col' | 'row' | false; //是否必须整行或者整列选中
     ranges: (CellRange & { skipBodyMerge?: boolean })[];
     highlightScope: HighlightScope;
     cellPos: CellPosition;
@@ -83,6 +79,7 @@ export class StateManager {
     singleStyle?: boolean; // select当前单元格是否使用单独样式
     disableHeader?: boolean; // 是否禁用表头select
     disableCtrlMultiSelect?: boolean; // 是否禁用ctrl多选框
+    disableShiftMultiSelect?: boolean; // 是否禁用shift多选框
     /** 点击表头单元格效果
      * 'inline': 点击行表头则整行选中，选择列表头则整列选中；
      * 'cell': 仅仅选择当前点击的表头单元格；
@@ -149,10 +146,13 @@ export class StateManager {
     colSource: number;
     colTarget: number;
     rowSource: number;
+    rowSourceSize: number;
     rowTarget: number;
+    rowTargetSize: number;
     x: number;
     y: number;
     moving: boolean;
+    movingColumnOrRow: 'column' | 'row';
   };
   menu: {
     x: number;
@@ -282,9 +282,12 @@ export class StateManager {
       colTarget: -1,
       rowSource: -1,
       rowTarget: -1,
+      rowSourceSize: 0,
+      rowTargetSize: 0,
       x: 0,
       y: 0,
-      moving: false
+      moving: false,
+      movingColumnOrRow: undefined
     };
     this.menu = {
       x: -1,
@@ -366,9 +369,12 @@ export class StateManager {
       colTarget: -1,
       rowSource: -1,
       rowTarget: -1,
+      rowSourceSize: 0,
+      rowTargetSize: 0,
       x: 0,
       y: 0,
-      moving: false
+      moving: false,
+      movingColumnOrRow: undefined
     };
     this.menu = {
       x: -1,
@@ -496,6 +502,7 @@ export class StateManager {
     this.select.cornerHeaderSelectMode = cornerHeaderSelectMode;
     this.select.highlightInRange = highlightInRange;
     this.select.disableCtrlMultiSelect = this.table.options.keyboardOptions?.ctrlMultiSelect === false;
+    this.select.disableShiftMultiSelect = this.table.options.keyboardOptions?.shiftMultiSelect === false;
   }
 
   isSelected(col: number, row: number): boolean {
@@ -617,8 +624,8 @@ export class StateManager {
   updateSelectPos(
     col: number,
     row: number,
-    isShift: boolean = false,
-    isCtrl: boolean = false,
+    enableShiftSelectMode: boolean = false,
+    enableCtrlSelectMode: boolean = false,
     isSelectAll: boolean = false,
     makeSelectCellVisible: boolean = true,
     skipBodyMerge: boolean = false
@@ -639,7 +646,28 @@ export class StateManager {
     if (row > this.table.rowCount - 1) {
       row = this.table.rowCount - 1;
     }
-    updateSelectPosition(this, col, row, isShift, isCtrl, isSelectAll, makeSelectCellVisible, skipBodyMerge);
+    const oldCellPosCol = this.select.cellPos.col;
+    const oldCellPosRow = this.select.cellPos.row;
+    updateSelectPosition(
+      this,
+      col,
+      row,
+      enableShiftSelectMode,
+      enableCtrlSelectMode,
+      isSelectAll,
+      makeSelectCellVisible,
+      skipBodyMerge
+    );
+    if (
+      this.table.hasListeners(TABLE_EVENT_TYPE.SELECTED_CHANGED) &&
+      (oldCellPosCol !== col || oldCellPosRow !== row)
+    ) {
+      this.table.fireListeners(TABLE_EVENT_TYPE.SELECTED_CHANGED, {
+        ranges: this.select.ranges,
+        col: col,
+        row: row
+      });
+    }
   }
 
   checkCellRangeInSelect(cellPosStart: CellAddress, cellPosEnd: CellAddress) {
@@ -745,7 +773,8 @@ export class StateManager {
       // deal with merge cell
       if (
         !this.table.isSeriesNumber(this.select.cellPos.col, this.select.cellPos.row) &&
-        !this.table.isHeader(this.select.cellPos.col, this.select.cellPos.row)
+        !this.table.isHeader(this.select.cellPos.col, this.select.cellPos.row) &&
+        !this.table.isSeriesNumberInBody(currentRange.start.col, currentRange.start.row)
       ) {
         expendCellRange(currentRange, this.table);
       }
@@ -880,8 +909,15 @@ export class StateManager {
     this.fillHandle.beforeFillMinRow = undefined;
   }
 
-  startMoveCol(col: number, row: number, x: number, y: number, event: MouseEvent | PointerEvent | TouchEvent) {
-    startMoveCol(col, row, x, y, this, event);
+  startMoveCol(
+    col: number,
+    row: number,
+    x: number,
+    y: number,
+    event: MouseEvent | PointerEvent | TouchEvent,
+    dragColumnOrRow?: 'column' | 'row'
+  ) {
+    startMoveCol(col, row, x, y, this, event, dragColumnOrRow);
   }
   updateMoveCol(col: number, row: number, x: number, y: number, event: MouseEvent | PointerEvent | TouchEvent) {
     updateMoveCol(col, row, x, y, this, event);
@@ -904,12 +940,11 @@ export class StateManager {
     //         (this.table.rowHeaderLevelCount ?? 0) + this.table.internalProps.layoutMap.leftRowSeriesNumberColumnCount,
     //         this.table.options.frozenColCount ?? 0
     //       );
-    let originalFrozenColCount = this.table.options.frozenColCount
-      ? this.table.options.frozenColCount
-      : this.table.isPivotTable() || (this.table.isListTable() && this.table.internalProps.transpose)
-      ? (this.table.rowHeaderLevelCount ?? 0) + this.table.internalProps.layoutMap.leftRowSeriesNumberColumnCount
-      : 0;
-
+    let originalFrozenColCount =
+      this.table.options.frozenColCount ??
+      (this.table.isPivotTable() || (this.table.isListTable() && this.table.internalProps.transpose)
+        ? (this.table.rowHeaderLevelCount ?? 0) + this.table.internalProps.layoutMap.leftRowSeriesNumberColumnCount
+        : 0);
     if (originalFrozenColCount) {
       // 确保冻结列数不超过实际列数
       originalFrozenColCount = Math.min(originalFrozenColCount, this.table.colCount);
@@ -1152,6 +1187,9 @@ export class StateManager {
     }
   }
   setScrollTop(top: number, event?: FederatedWheelEvent, triggerEvent: boolean = true) {
+    if (!this.table || !this.table.scenegraph) {
+      return;
+    }
     // 矫正top值范围
     const totalHeight = this.table.getAllRowsHeight();
     // _disableColumnAndRowSizeRound环境中，可能出现
@@ -1159,10 +1197,10 @@ export class StateManager {
     // （由于小数在取数时被省略）
     // 这里加入tolerance，避免出现无用滚动
     const sizeTolerance = this.table.options.customConfig?._disableColumnAndRowSizeRound ? 1 : 0;
-    top = Math.max(0, Math.min(top, totalHeight - this.table.scenegraph.height - sizeTolerance));
+    top = Math.max(0, Math.min(top, totalHeight - (this.table.scenegraph?.height ?? 0) - sizeTolerance));
     top = Math.ceil(top);
     const oldVerticalBarPos = this.scroll.verticalBarPos;
-    const yRatio = top / (totalHeight - this.table.scenegraph.height);
+    const yRatio = top / (totalHeight - (this.table.scenegraph?.height ?? 0));
 
     if (
       (oldVerticalBarPos !== top || this.table.options?.customConfig?.scrollEventAlwaysTrigger === true) &&
@@ -1189,7 +1227,7 @@ export class StateManager {
 
       if (canScroll.some(value => value === false)) {
         // reset scrollbar pos
-        const yRatio = this.scroll.verticalBarPos / (totalHeight - this.table.scenegraph.height);
+        const yRatio = this.scroll.verticalBarPos / (totalHeight - (this.table.scenegraph?.height ?? 0));
         this.table.scenegraph.component.updateVerticalScrollBarPos(yRatio);
         return;
       }
@@ -1229,6 +1267,9 @@ export class StateManager {
     }
   }
   setScrollLeft(left: number, event?: FederatedWheelEvent, triggerEvent: boolean = true) {
+    if (!this.table || !this.table.scenegraph) {
+      return;
+    }
     const oldScrollLeft = this.table.scrollLeft;
     // 矫正left值范围
     const totalWidth = this.table.getAllColsWidth();
@@ -1589,7 +1630,9 @@ export class StateManager {
       event
     });
   }
-
+  setSelectInline(selectInline: 'col' | 'row' | false) {
+    this.select.selectInline = selectInline;
+  }
   updateSortState(sortState: SortState[]) {
     sortState = Array.isArray(sortState) ? sortState : [sortState];
 
@@ -1688,7 +1731,10 @@ export class StateManager {
     this.frozen.icon = iconMark;
   }
 
-  updateCursor(mode: string = 'default') {
+  updateCursor(mode?: string) {
+    if (!mode) {
+      mode = this.table.options.defaultCursor ?? 'default';
+    }
     this.table.getElement().style.cursor = mode;
   }
 

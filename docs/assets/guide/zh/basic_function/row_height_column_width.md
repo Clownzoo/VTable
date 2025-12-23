@@ -65,6 +65,15 @@ const table = new VTable.ListTable({
 
 如果需要自定义计算行高的逻辑，可以配置`customComputeRowHeight`函数来代理 VTable 内部计算行高的逻辑。
 
+## 逐列设置行高
+
+通过`rowHeightConfig`配置项进行设置，该配置项可以设定为一个数组，分别对应每一行的行高。key 为行索引，height 为行高。
+
+```javascript
+const table = new VTable.ListTable({
+  rowHeightConfig: [{key: 0, height: 50}, {key: 3, height: 60}]
+});
+```
 # 列宽相关配置
 
 ## 列宽 width
@@ -85,6 +94,28 @@ const table = new VTable.ListTable({
       width: 200
     }
   ]
+});
+```
+
+除了在列属性中配置具体的宽度值，还可以通过`columnWidthConfig`配置项进行设置，该配置项可以设定为一个数组，分别对应每一列的列宽。key 为columns中定义的每列具体配置中的key，width 为列宽。
+
+```javascript
+const table = new VTable.ListTable({
+   columns: [
+    {
+      // ...其他配置项
+      key: 'name',
+      title: '姓名',
+      field: 'name',
+    },
+    {
+      // ...其他配置项
+      key: 'age',
+      title: '年龄',
+      field: 'age',
+    }
+  ],
+  columnWidthConfig: [{key: 'name', width: 200}, {key: 'age', width: 300}]
 });
 ```
 
@@ -151,6 +182,12 @@ const table = new VTable.PivotTable({
  <div style="width: 80%; text-align: center;">
      <img src="https://lf9-dp-fe-cms-tos.byteorg.com/obj/bit-cloud/VTable/guide/columnWidthConfig.jpeg" />
   </div>
+
+基本表格ListTable，透视表PivotTable，透视图PivotChart都支持这个配置项。
+
+另外，透视表和透视图还支持`columnWidthConfigForRowHeader`配置项，用于设置行表头列宽。
+
+注意和`columnWidthConfig`的区别，`columnWidthConfigForRowHeader`是通过行维度key设置行表头列宽，而`columnWidthConfig`是设通过列维度路径来设置列宽。如果不想通过维度key设置行表头列宽，也可以通过配置[`defaultHeaderColWidth`](https://visactor.com/vtable/option/ListTable#defaultHeaderColWidth)来设置。
 
 ## 默认列宽
 

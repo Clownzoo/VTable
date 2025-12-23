@@ -69,6 +69,7 @@ export type ScrollStyle = {
   horizontalPadding?: number | [number, number, number, number];
   /** 竖向滚动条 padding */
   verticalPadding?: number | [number, number, number, number];
+  ignoreFrozenCols?: boolean; // 忽略所有冻结列宽度，默认false
 };
 /**
  * 气泡框，按钮的的解释信息
@@ -162,10 +163,18 @@ export interface ITableThemeDefine {
   // style for axis
   axisStyle?: {
     defaultAxisStyle?: Omit<ICellAxisOption, 'type' | 'domain' | 'range' | 'orient' | '__ticksForVTable'>;
-    leftAxisStyle?: Omit<ICellAxisOption, 'type' | 'domain' | 'range' | 'orient' | '__ticksForVTable'>;
-    rightAxisStyle?: Omit<ICellAxisOption, 'type' | 'domain' | 'range' | 'orient' | '__ticksForVTable'>;
-    topAxisStyle?: Omit<ICellAxisOption, 'type' | 'domain' | 'range' | 'orient' | '__ticksForVTable'>;
-    bottomAxisStyle?: Omit<ICellAxisOption, 'type' | 'domain' | 'range' | 'orient' | '__ticksForVTable'>;
+    leftAxisStyle?: Omit<ICellAxisOption, 'type' | 'domain' | 'range' | 'orient' | '__ticksForVTable'> & {
+      cellPaddingLeft?: number;
+    };
+    rightAxisStyle?: Omit<ICellAxisOption, 'type' | 'domain' | 'range' | 'orient' | '__ticksForVTable'> & {
+      cellPaddingRight?: number;
+    };
+    topAxisStyle?: Omit<ICellAxisOption, 'type' | 'domain' | 'range' | 'orient' | '__ticksForVTable'> & {
+      cellPaddingTop?: number;
+    };
+    bottomAxisStyle?: Omit<ICellAxisOption, 'type' | 'domain' | 'range' | 'orient' | '__ticksForVTable'> & {
+      cellPaddingBottom?: number;
+    };
   };
 
   checkboxStyle?: CheckboxStyle;

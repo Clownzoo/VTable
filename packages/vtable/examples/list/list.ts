@@ -11,7 +11,7 @@ const generatePersons = count => {
     tel: '000-0000-0000',
     sex: i % 2 === 0 ? 'boy' : 'girl',
     work: i % 2 === 0 ? 'back-end engineer' + (i + 1) : 'front-end engineer' + (i + 1),
-    city: 'beijing'
+    city: i % 3 === 0 ? 'beijing' : 'shanghai'
   }));
 };
 
@@ -137,7 +137,8 @@ export function createTable() {
     {
       field: 'city',
       title: 'city',
-      width: 150
+      width: 150,
+      mergeCell: true
     },
     {
       field: 'date1',
@@ -222,7 +223,9 @@ export function createTable() {
     rowSeriesNumber: {
       dragOrder: true
     },
-
+    dragOrder: {
+      dragHeaderMode: 'column'
+    },
     columns: [
       ...columns
       // ...columns,
@@ -252,8 +255,9 @@ export function createTable() {
     keyboardOptions: {
       pasteValueToCell: true,
       copySelected: true,
-      selectAllOnCtrlA: true,
-      ctrlMultiSelect: false
+      selectAllOnCtrlA: true
+      // ctrlMultiSelect: false,
+      // shiftMultiSelect: false
     },
     eventOptions: {
       preventDefaultContextMenu: false
@@ -268,6 +272,14 @@ export function createTable() {
     //   headerSelectMode: 'cell',
     //   highlightMode: 'cross'
     // },
+    resize: {
+      canResizeColumn: (col, row, table) => {
+        if (col === table.colCount - 1) {
+          return false;
+        }
+        return true;
+      }
+    },
     theme: {
       frameStyle: {
         cornerRadius: [10, 0, 0, 10],

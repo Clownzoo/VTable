@@ -65,6 +65,16 @@ const table = new VTable.ListTable({
 
 If you need to customize the logic for calculating row height, you can configure the `customComputeRowHeight` function to proxy the logic for calculating row height inside VTable.
 
+## Set row height by row index
+
+You can set the row height through the `rowHeightConfig` configuration item. The configuration item can be set to an array, corresponding to the row height of each row. The key corresponds to the row index, and the height corresponds to the row height.
+
+```javascript
+const table = new VTable.ListTable({
+  rowHeightConfig: [{key: 0, height: 50}, {key: 3, height: 60}]
+});
+```
+
 # Column width related configuration
 
 ## Column width width
@@ -85,6 +95,28 @@ const table = new VTable.ListTable({
       width: 200
     }
   ]
+});
+```
+
+Besides configuring a specific width value in the column properties, you can also configure the column width through the `columnWidthConfig` configuration item. The configuration item can be set to an array, corresponding to the column width of each column. The key corresponds to the key defined in the specific configuration of each column in columns.
+
+```javascript
+const table = new VTable.ListTable({
+  columns: [
+    {
+      // ...Other configuration items
+      key: 'name',
+      title: 'Name',
+      field: 'name',
+    },
+    {
+      // ...Other configuration items
+      key: 'age',
+      title: 'Age',
+      field: 'age',
+    }
+  ],
+  columnWidthConfig: [{key: 'name', width: 200}, {key: 'age', width: 300}]
 });
 ```
 
@@ -150,6 +182,12 @@ The effect is as follows:
 <div style="width: 80%; text-align: center;">
 <img src="https://lf9-dp-fe-cms-tos.byteorg.com/obj/bit-cloud/VTable/guide/columnWidthConfig.jpeg" />
 </div>
+
+Basic table ListTable, pivot table PivotTable, pivot chart PivotChart all support this configuration item.
+
+In addition, pivot table and pivot chart also support the `columnWidthConfigForRowHeader` configuration item, which is used to set the column width of the row header.
+
+Note the difference between `columnWidthConfigForRowHeader` and `columnWidthConfig`, `columnWidthConfigForRowHeader` sets the column width of the row header through the row dimension key, while `columnWidthConfig` sets the column width through the column dimension path. If you do not want to set the row header column width through the dimension key, you can also set it through the [`defaultHeaderColWidth`](https://visactor.com/vtable/option/ListTable) configuration item.
 
 ## Default column width
 

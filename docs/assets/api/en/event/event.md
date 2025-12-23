@@ -31,6 +31,7 @@ Supported event types:
   MOUSEENTER_CELL: 'mouseenter_cell',
   MOUSELEAVE_CELL: 'mouseleave_cell',
   CONTEXTMENU_CELL: 'contextmenu_cell',
+  CONTEXTMENU_CANVAS: 'contextmenu_canvas'
   MOUSEENTER_TABLE: 'mouseenter_table',
   MOUSELEAVE_TABLE: 'mouseleave_table',
   MOUSEDOWN_TABLE: 'mousedown_table',
@@ -63,9 +64,25 @@ Supported event types:
   ......
 }`
 
+## BEFORE_INIT
+
+Triggered before initialization
+
+## BEFORE_UPDATE_OPTION
+
+Triggered before updating the table options
+
 ## INITIALIZED
 
 Triggered after successful initialization is completed
+
+## UPDATED
+
+Triggered after the table is updated
+
+## BEFORE_SET_SIZE
+
+Triggered before setting the size of the table
 
 ## AFTER_RENDER
 
@@ -83,6 +100,9 @@ Listen to vchart events, specific event types can refer to [VChart Events](https
    */
   onVChartEvent(type: string, listener: AnyFunction): void
 ```
+## UPDATED
+
+Triggered after the table is updated
 
 ## CLICK_CELL
 
@@ -118,6 +138,19 @@ Cell selected state change event
 
 Cell selected state all be cleard, when click table's blank region, this event will be triggered.
 
+## SELECTED_CHANGED
+
+Cell selected range change event
+
+Callback parameter:
+```
+{
+    col: number;
+    row: number;
+    ranges: CellRange[];
+  };
+```
+
 ## KEYDOWN
 
 keystroke event
@@ -147,6 +180,10 @@ Refer to the parameter types introduced in the CLICK_CELL event for the paramete
 Cell right-click events
 
 {{ use: MousePointerMultiCellEvent() }}
+
+## CONTEXTMENU_CANVAS
+
+Canvas right-click events
 
 ## MOUSEENTER_TABLE
 
@@ -629,3 +666,39 @@ Empty data prompt click event.
 ## EMPTY_TIP_DBLCLICK
 
 Empty data prompt double-click event.
+
+## AFTER_UPDATE_CELL_CONTENT_WIDTH
+
+Event triggered after cell content width is updated.
+
+Event callback function parameter types:
+
+```
+{
+  col: number;
+  row: number;
+  cellHeight: number;
+  cellGroup: any;
+  padding: [number, number, number, number];
+  textBaseline: CanvasTextBaseline;
+}
+```
+
+## AFTER_UPDATE_SELECT_BORDER_HEIGHT
+
+Event triggered after selection border height is updated.
+
+Event callback function parameter types:
+
+```
+{
+  startRow: number;
+  endRow: number;
+  currentHeight: number;
+  selectComp: { 
+    rect: any; 
+    fillhandle?: any; 
+    role: string; 
+  };
+}
+```

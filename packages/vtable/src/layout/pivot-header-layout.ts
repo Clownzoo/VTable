@@ -245,7 +245,8 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
     this.resetRowHeaderLevelCount();
 
     if (this._table.isPivotChart()) {
-      this.hasTwoIndicatorAxes = this.indicatorsDefine.some((indicatorObject: any) => {
+      this.hasTwoIndicatorAxes = false;
+      this.indicatorsDefine.forEach((indicatorObject: any) => {
         if (
           indicatorObject.chartSpec &&
           indicatorObject.chartSpec.series &&
@@ -261,11 +262,64 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
               return true;
             })
           ) {
+            indicatorObject.hasTwoIndicatorAxes = true;
+            this.hasTwoIndicatorAxes = true;
             return true;
           }
         }
+        indicatorObject.hasTwoIndicatorAxes = false;
         return false;
       });
+      //上面的series多系列判断逻辑基础上，在判断是否主动配置了两个指标轴（不是series的话应该是两个一模一样的轴）
+      // if (this.hasTwoIndicatorAxes === false) {
+      this.indicatorsDefine.forEach((indicatorObject: any) => {
+        if ((indicatorObject as any).hasTwoIndicatorAxes) {
+          return false;
+        }
+        if (indicatorObject.chartSpec) {
+          const axes = indicatorObject.chartSpec.axes ?? (this._table as PivotChart).pivotChartAxes ?? [];
+          if (this.indicatorsAsCol) {
+            const topAxis = axes.find((axis: any) => {
+              if (axis.orient === 'top' && axis.visible !== false) {
+                return true;
+              }
+              return false;
+            });
+            const bottomAxis = axes.find((axis: any) => {
+              if (axis.orient === 'bottom' && axis.visible !== false) {
+                return true;
+              }
+              return false;
+            });
+            if (topAxis && bottomAxis) {
+              indicatorObject.hasTwoIndicatorAxes = true;
+              this.hasTwoIndicatorAxes = true;
+              return true;
+            }
+          } else {
+            const leftAxis = axes.find((axis: any) => {
+              if (axis.orient === 'left' && axis.visible !== false) {
+                return true;
+              }
+              return false;
+            });
+            const rightAxis = axes.find((axis: any) => {
+              if (axis.orient === 'right' && axis.visible !== false) {
+                return true;
+              }
+              return false;
+            });
+            if (leftAxis && rightAxis) {
+              indicatorObject.hasTwoIndicatorAxes = true;
+              this.hasTwoIndicatorAxes = true;
+              return true;
+            }
+          }
+        }
+        indicatorObject.hasTwoIndicatorAxes = false;
+        return false;
+      });
+      // }
     }
     this.resetColumnHeaderLevelCount();
 
@@ -1786,19 +1840,6 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
     return 0;
   }
   get rightFrozenColCount(): number {
-    // // return 0;
-    // if (this.showHeader && this.showColumnHeader) {
-    //   if (!this.indicatorsAsCol && !this.hideIndicatorName) {
-    //     // 查询指标是否有multiIndicator
-    //     return this.indicatorsDefine.find(indicator => {
-    //       return (indicator as any)?.multiIndicator;
-    //     })
-    //       ? 1
-    //       : 0;
-    //   }
-    // }
-    // return 0;
-    //上面是原有逻辑
     //下面是pivot-layout中逻辑
     if (!this._table.isPivotChart()) {
       if (this._table.internalProps.rightFrozenColCount) {
@@ -2303,13 +2344,47 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
         } = {};
         rowHeaderPath.dimensionKey = rowHeader.dimensionKey;
         rowHeaderPath.indicatorKey = rowHeader.indicatorKey;
+        // 如果value为null且没有indicatorKey时保持value为null（区分null和空字符串，防止单元格数据匹配不对）
         rowHeaderPath.value =
-          rowHeader.value ?? this.getIndicatorInfoByIndicatorKey(rowHeader.indicatorKey)?.title ?? '';
+          rowHeader.value ??
+          (rowHeader.indicatorKey
+            ? this.getIndicatorInfoByIndicatorKey(rowHeader.indicatorKey)?.title ?? ''
+            : rowHeader.value);
         rowHeaderPath.virtual = rowHeader.virtual;
         rowHeaderPath.role = rowHeader.role;
         headerPaths.rowHeaderPaths!.push(rowHeaderPath);
       }
     });
+    return headerPaths;
+  }
+  getCellRowHeaderFullPaths(col: number): IDimensionInfo[] {
+    const headerPaths: IDimensionInfo[] = [];
+    //根据rows和indicatorAsCol来获取行表头路径,只需要考虑rowHierarchyType为grid的情况
+    if (this.rowHierarchyType === 'grid') {
+      for (let i = 0; i <= Math.min(this.rowsDefine.length - 1, col); i++) {
+        const rowDefine = this.rowsDefine[i];
+        if (typeof rowDefine === 'string') {
+          headerPaths.push({
+            dimensionKey: rowDefine
+          });
+        } else {
+          headerPaths.push({
+            dimensionKey: rowDefine.dimensionKey
+          });
+        }
+      }
+      if (col >= this.rowsDefine.length && this.indicatorsAsCol === false && this.indicatorsDefine.length > 0) {
+        if (typeof this.indicatorsDefine[0] === 'string') {
+          headerPaths.push({
+            indicatorKey: this.indicatorsDefine[0]
+          });
+        } else {
+          headerPaths.push({
+            indicatorKey: this.indicatorsDefine[0].indicatorKey
+          });
+        }
+      }
+    }
     return headerPaths;
   }
   private getIndicatorInfoByIndicatorKey(indicatorKey: string) {
@@ -3284,6 +3359,101 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
   }
 
   /**
+   * 递归回溯匹配维度路径
+   * @param paths 要匹配的路径数组
+   * @param treeNodes 当前层级的树节点数组
+   * @param needLowestLevel 是否需要匹配到最底层
+   * @param checkAxisNode 是否检查axis节点（用于rowHeaderPaths的特殊处理）
+   * @param pathIndex 当前匹配的路径索引
+   * @returns 匹配到的维度节点，如果未找到则返回undefined
+   */
+  matchDimensionPath = (
+    paths: IDimensionInfo[],
+    treeNodes: IHeaderTreeDefine[],
+    needLowestLevel: boolean,
+    checkAxisNode: boolean = false,
+    pathIndex: number = 0
+  ): ITreeLayoutHeadNode | undefined => {
+    if (pathIndex >= paths.length) {
+      return undefined;
+    }
+
+    const currentPath = paths[pathIndex];
+
+    // 遍历当前层级的所有节点，寻找匹配的节点
+    for (let j = 0; j < treeNodes.length; j++) {
+      const dimension = treeNodes[j];
+
+      // 检查是否匹配当前路径节点
+      const isMatch =
+        (!isValid(currentPath.indicatorKey) &&
+          dimension.dimensionKey === currentPath.dimensionKey &&
+          dimension.value === currentPath.value) ||
+        (isValid(currentPath.indicatorKey) &&
+          dimension.indicatorKey === currentPath.indicatorKey &&
+          ((isValid(dimension.value) && isValid(currentPath.value) && currentPath.value === dimension.value) ||
+            !isValid(dimension.value) ||
+            !isValid(currentPath.value)));
+
+      if (isMatch) {
+        const children = dimension.children as IHeaderTreeDefine[];
+
+        // 如果是最后一级路径
+        if (pathIndex === paths.length - 1) {
+          if (needLowestLevel) {
+            // 需要最底层：如果没有子节点，或者子节点中有axis节点，则返回当前节点
+            const hasAxisNode =
+              checkAxisNode && children && children.some((row: IHeaderTreeDefine) => row.dimensionKey === 'axis');
+            if (!children?.length || hasAxisNode) {
+              return dimension as ITreeLayoutHeadNode;
+            }
+            // 如果有子节点且没有axis节点，说明这不是最底层，需要递归查找叶子节点
+            // 查找第一个满足条件的叶子节点（没有子节点或子节点中有axis的节点）
+            const findLeafNode = (nodes: IHeaderTreeDefine[]): ITreeLayoutHeadNode | undefined => {
+              for (const node of nodes) {
+                const nodeChildren = node.children as IHeaderTreeDefine[];
+                const nodeHasAxis =
+                  checkAxisNode &&
+                  nodeChildren &&
+                  nodeChildren.some((row: IHeaderTreeDefine) => row.dimensionKey === 'axis');
+                if (!nodeChildren?.length || nodeHasAxis) {
+                  return node as ITreeLayoutHeadNode;
+                }
+                const leaf = findLeafNode(nodeChildren);
+                if (leaf) {
+                  return leaf;
+                }
+              }
+              return undefined;
+            };
+            const leafNode = findLeafNode(children);
+            if (leafNode) {
+              return leafNode;
+            }
+          } else {
+            // 不需要最底层，直接返回当前节点
+            return dimension as ITreeLayoutHeadNode;
+          }
+        }
+
+        // 如果还有子节点，继续向下匹配
+        if (children?.length) {
+          const result = this.matchDimensionPath(paths, children, needLowestLevel, checkAxisNode, pathIndex + 1);
+          if (result) {
+            return result;
+          }
+          // 如果向下匹配失败，继续尝试当前层级的其他节点（回溯）
+        } else if (pathIndex === paths.length - 1) {
+          // 是最后一级但没有子节点，返回当前节点
+          return dimension as ITreeLayoutHeadNode;
+        }
+      }
+    }
+
+    return undefined;
+  };
+
+  /**
    * 通过dimensionPath获取到对应的表头地址col row, dimensionPath不要求必须按照表头层级顺序传递
    * @param dimensions
    * @returns
@@ -3392,46 +3562,24 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
       needLowestLevel_colPaths = true;
       needLowestLevel_rowPaths = true;
     }
-    if (colHeaderPaths.length >= this._getColumnHeaderTreeExpandedMaxLevelCount()) {
+    if ((colHeaderPaths?.length ?? 0) && colHeaderPaths.length >= this._getColumnHeaderTreeExpandedMaxLevelCount()) {
       needLowestLevel_colPaths = true;
     }
-    if (rowHeaderPaths.length >= this._getRowHeaderTreeExpandedMaxLevelCount()) {
+    if ((rowHeaderPaths?.length ?? 0) && rowHeaderPaths.length >= this._getRowHeaderTreeExpandedMaxLevelCount()) {
       needLowestLevel_rowPaths = true;
     }
     let col;
     let row;
     let defaultCol;
     let defaultRow;
-    let rowArr = this.rowTree;
     let rowDimensionFinded;
-    let colArr = this.columnTree;
     let colDimensionFinded;
+
     // 按照colHeaderPaths维度层级寻找到底层维度值节点
     if (colHeaderPaths) {
-      for (let i = 0; i < colHeaderPaths.length; i++) {
-        const colDimension = colHeaderPaths[i];
-        for (let j = 0; j < colArr.length; j++) {
-          const dimension = colArr[j];
-          if (
-            (!isValid(colDimension.indicatorKey) &&
-              dimension.dimensionKey === colDimension.dimensionKey &&
-              dimension.value === colDimension.value) ||
-            (isValid(colDimension.indicatorKey) &&
-              dimension.indicatorKey === colDimension.indicatorKey &&
-              ((isValid(dimension.value) && isValid(colDimension.value) && colDimension.value === dimension.value) ||
-                !isValid(dimension.value) ||
-                !isValid(colDimension.value)))
-          ) {
-            colArr = dimension.children as IHeaderTreeDefine[];
-            if (needLowestLevel_colPaths && !colArr?.length) {
-              colDimensionFinded = dimension;
-            } else if (!needLowestLevel_colPaths) {
-              colDimensionFinded = dimension;
-            }
-            break;
-          }
-        }
-      }
+      colDimensionFinded = this.matchDimensionPath(colHeaderPaths, this.columnTree, needLowestLevel_colPaths) as
+        | ITreeLayoutHeadNode
+        | undefined;
     }
     // 按照rowHeaderPaths维度层级寻找到底层维度值节点
     if (rowHeaderPaths?.length >= 1) {
@@ -3467,32 +3615,12 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
         });
         row = this._rowHeaderCellIds.indexOf(findedCellIdPath) + this.columnHeaderLevelCount;
       } else {
-        for (let i = 0; i < rowHeaderPaths.length; i++) {
-          const rowDimension = rowHeaderPaths[i];
-          // 判断级别，找到distDimension
-          // let isCol = false;
-          for (let j = 0; j < rowArr.length; j++) {
-            const dimension = rowArr[j];
-            if (
-              (!isValid(rowDimension.indicatorKey) &&
-                dimension.dimensionKey === rowDimension.dimensionKey &&
-                dimension.value === rowDimension.value) ||
-              (isValid(rowDimension.indicatorKey) &&
-                dimension.indicatorKey === rowDimension.indicatorKey &&
-                (!isValid(rowDimension.value) || dimension.value === rowDimension.value))
-            ) {
-              rowArr = dimension.children as IHeaderTreeDefine[];
-              if (needLowestLevel_rowPaths && (!rowArr?.length || rowArr.some(row => row.dimensionKey === 'axis'))) {
-                rowDimensionFinded = dimension;
-              } else if (!needLowestLevel_rowPaths) {
-                rowDimensionFinded = dimension;
-              }
-              break;
-            }
-          }
-        }
+        rowDimensionFinded = this.matchDimensionPath(rowHeaderPaths, this.rowTree, needLowestLevel_rowPaths, true) as
+          | ITreeLayoutHeadNode
+          | undefined;
       }
     }
+
     // 如果是body单元格 需要找到行列对应的维度值节点
     if (!forceBody && needLowestLevel_colPaths && needLowestLevel_rowPaths) {
       if ((!rowDimensionFinded && !isValid(row)) || !colDimensionFinded) {
@@ -3505,7 +3633,19 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
       const { startInTotal, afterSpanLevel } = (rowDimensionFinded as ITreeLayoutHeadNode) ?? defaultDimension;
       row += startInTotal ?? 0;
       if (this.rowHierarchyType === 'grid') {
-        defaultCol = (this.rowHeaderTitle ? afterSpanLevel + 1 : afterSpanLevel) + this.leftRowSeriesNumberColumnCount;
+        // defaultCol = (this.rowHeaderTitle ? afterSpanLevel + 1 : afterSpanLevel) + this.leftRowSeriesNumberColumnCount;
+        // 传入rowHeaderPaths是合并单元格如行总计的path数据的情况，上面defaultCol总是返回0 所以需要修改如下：
+        //检查rowHeaderPaths 和this.rowDimensionKeys数组中的维度key是否匹配
+        const isMatch = rowHeaderPaths.every((path: IDimensionInfo, index: number) => {
+          return this.rowDimensionKeys[index] === path.dimensionKey;
+        });
+        if (isMatch) {
+          const col = rowHeaderPaths.length - 1;
+          defaultCol = (this.rowHeaderTitle ? col + 1 : col) + this.leftRowSeriesNumberColumnCount;
+        } else {
+          defaultCol =
+            (this.rowHeaderTitle ? afterSpanLevel + 1 : afterSpanLevel) + this.leftRowSeriesNumberColumnCount;
+        }
       } else {
         defaultCol = 0;
       } //树形展示的情况下 肯定是在第0列
@@ -3518,6 +3658,27 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
     }
     if (isValid(col) || isValid(row)) {
       return { col: col ?? defaultCol, row: row ?? defaultRow };
+    }
+    // 上述通过rowHeaderPaths colHeaderPaths和rowTree colTree匹配不到行列号，需要特殊处理
+    if (rowHeaderPaths.length > 0) {
+      //表示寻找的是行表头的某个列号
+      //匹配和this.rowDimensionKeys数组中的维度key，找到对应的列号
+      //检查rowHeaderPaths 和this.rowDimensionKeys数组中的维度key是否匹配
+      const isMatch = rowHeaderPaths.every((path: IDimensionInfo, index: number) => {
+        return this.rowDimensionKeys[index] === path.dimensionKey;
+      });
+      if (isMatch) {
+        const col = rowHeaderPaths.length - 1;
+        return { col: (this.rowHeaderTitle ? col + 1 : col) + this.leftRowSeriesNumberColumnCount, row: undefined };
+      }
+      // const col = rowHeaderPaths.reduce((acc, path) => {
+      //   const index = this.rowDimensionKeys.indexOf(path.dimensionKey);
+      //   if (index >= 0) {
+      //     acc += 1;
+      //   }
+      //   return acc;
+      // }, -1);
+      // return { col: (this.rowHeaderTitle ? col + 1 : col) + this.leftRowSeriesNumberColumnCount, row: undefined };
     }
     return undefined;
   }
@@ -3791,25 +3952,63 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
   /**
    *  获取图表对应的维度key非指标
    * */
-  getDimensionKeyInChartSpec(_col: number, _row: number) {
+  getDimensionKeyInChartSpec(_col: number, _row: number, type?: 'xField' | 'yField') {
     let dimensionKey: string;
     if (this.indicatorsAsCol === false) {
-      //考虑pie和bar 同时配置的情况 series?.[0]?.xField;没有的情况
+      const chartSpec = this.getRawChartSpec(_col, _row);
+      if (chartSpec) {
+        dimensionKey =
+          type === 'yField'
+            ? chartSpec.yField ?? chartSpec?.series?.[0]?.yField
+            : chartSpec.type === 'histogram' //特殊处理histogram直方图xField和x2Field
+            ? chartSpec.x2Field
+            : chartSpec.xField ?? chartSpec?.series?.[0]?.xField;
+
+        if (dimensionKey) {
+          return dimensionKey;
+        }
+      }
+      //考虑pie和bar 同时配置的情况 , 只有上面的判断逻辑是不足的，例如https://bugserver.cn.goofy.app/case?product=VTable&fileid=65a66c5c518457638fa485bf
       for (let i = 0; i < this.indicatorsDefine.length; i++) {
         const chartSpec = (this.indicatorsDefine[i] as IChartIndicator).chartSpec;
         if (chartSpec) {
-          dimensionKey = chartSpec.xField ?? chartSpec?.series?.[0]?.xField;
+          dimensionKey =
+            type === 'yField'
+              ? chartSpec.yField ?? chartSpec?.series?.[0]?.yField
+              : chartSpec.type === 'histogram' //特殊处理histogram直方图xField和x2Field
+              ? chartSpec.x2Field
+              : chartSpec.xField ?? chartSpec?.series?.[0]?.xField;
+
           if (dimensionKey) {
             return dimensionKey;
           }
         }
       }
     } else {
-      //考虑pie和bar 同时配置的情况 series?.[0]?.xField;没有的情况
+      const chartSpec = this.getRawChartSpec(_col, _row);
+      if (chartSpec) {
+        dimensionKey =
+          type === 'xField'
+            ? chartSpec.type === 'histogram' //特殊处理histogram直方图xField和x2Field
+              ? chartSpec.x2Field
+              : chartSpec.xField ?? chartSpec?.series?.[0]?.xField
+            : chartSpec.type === 'histogram' //特殊处理histogram直方图xField和x2Field
+            ? chartSpec.y2Field
+            : chartSpec.yField ?? chartSpec?.series?.[0]?.yField;
+        if (dimensionKey) {
+          return dimensionKey;
+        }
+      }
+      //考虑pie和bar 同时配置的情况 , 只有上面的判断逻辑是不足的，例如https://bugserver.cn.goofy.app/case?product=VTable&fileid=65a66c5c518457638fa485bf
       for (let i = 0; i < this.indicatorsDefine.length; i++) {
         const chartSpec = (this.indicatorsDefine[i] as IChartIndicator).chartSpec;
         if (chartSpec) {
-          dimensionKey = chartSpec.yField ?? chartSpec?.series?.[0]?.yField;
+          dimensionKey =
+            type === 'xField'
+              ? chartSpec.type === 'histogram' //特殊处理histogram直方图xField和x2Field
+                ? chartSpec.x2Field
+                : chartSpec.xField ?? chartSpec?.series?.[0]?.xField
+              : chartSpec.yField ?? chartSpec?.series?.[0]?.yField;
           if (dimensionKey) {
             return dimensionKey;
           }
@@ -3917,6 +4116,9 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
     const chartSpec = this.getRawChartSpec(_col, _row);
     const indicatorKeys: string[] = [];
     if (chartSpec) {
+      if (chartSpec.type === 'boxPlot') {
+        return [chartSpec.maxField];
+      }
       if (chartSpec.series || chartSpec.xField || chartSpec.yField) {
         if (this.indicatorsAsCol === false) {
           if (chartSpec.series) {
@@ -3948,8 +4150,14 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
     return null;
   }
   /** 获取某一图表列的最优高度，计算逻辑是根据图表的yField的维度值个数 * barWidth */
-  getOptimunHeightForChart(row: number) {
+  getOptimunHeightForChart(row: number, isHeatmap: boolean) {
     const path = this.getCellHeaderPaths(this.rowHeaderLevelCount, row).rowHeaderPaths;
+    if (isHeatmap) {
+      //如果是热力图，最后一层指标不能参与路径匹配
+      if (path[path.length - 1].indicatorKey) {
+        path.pop();
+      }
+    }
     let collectedValues: any;
     for (const key in this.dataset.collectValuesBy) {
       if (this.dataset.collectValuesBy[key].type === 'yField' && !this.dataset.collectValuesBy[key].range) {
@@ -3975,13 +4183,13 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
       );
     } else {
       const barWidth = this._chartItemSpanSize || 25;
-      height = (collectedValues?.length ?? 0) * (barWidth + barWidth / 3);
+      height = (collectedValues?.length ?? 0) * (barWidth + (isHeatmap ? 0 : barWidth / 3));
     }
     const padding = getQuadProps(this._chartPadding ?? (this._table.theme.bodyStyle.padding as number) ?? 0);
     return height + padding[0] + padding[2];
   }
   /** 获取某一图表列的最优宽度，计算逻辑是根据图表的xField的维度值个数 * barWidth */
-  getOptimunWidthForChart(col: number) {
+  getOptimunWidthForChart(col: number, isHeatmap: boolean) {
     const path = this.getCellHeaderPaths(col, this.columnHeaderLevelCount).colHeaderPaths;
     let collectedValues: any;
     for (const key in this.dataset.collectValuesBy) {
@@ -4008,7 +4216,7 @@ export class PivotHeaderLayoutMap implements LayoutMapAPI {
       );
     } else {
       const barWidth = this._chartItemSpanSize || 25;
-      width = (collectedValues?.length ?? 0) * (barWidth + barWidth / 3);
+      width = (collectedValues?.length ?? 0) * (barWidth + (isHeatmap ? 0 : barWidth / 3));
     }
 
     const padding = getQuadProps(this._chartPadding ?? (this._table.theme.bodyStyle.padding as number) ?? 0);

@@ -33,6 +33,7 @@ TABLE_EVENT_TYPE = {
   MOUSEENTER_CELL: 'mouseenter_cell',
   MOUSELEAVE_CELL: 'mouseleave_cell',
   CONTEXTMENU_CELL: 'contextmenu_cell',
+  CONTEXTMENU_CANVAS: 'contextmenu_canvas',
   MOUSEENTER_TABLE: 'mouseenter_table',
   MOUSELEAVE_TABLE: 'mouseleave_table',
   MOUSEDOWN_TABLE: 'mousedown_table',
@@ -65,10 +66,26 @@ TABLE_EVENT_TYPE = {
   ......
 }
 ```
+## BEFORE_INIT
+
+表格初始化前触发
+
+## BEFORE_UPDATE_OPTION
+
+表格更新配置前触发
 
 ## INITIALIZED
 
 成功初始化完成后触发
+
+## UPDATED
+
+表格更新完成事件
+
+## BEFORE_SET_SIZE
+
+表格设置大小前触发
+
 
 ## AFTER_RENDER
 
@@ -86,6 +103,10 @@ TABLE_EVENT_TYPE = {
    */
   onVChartEvent(type: string, listener: AnyFunction): void
 ```
+
+## UPDATED
+
+表格更新完成事件
 
 ## CLICK_CELL
 
@@ -121,6 +142,19 @@ TABLE_EVENT_TYPE = {
 
 当鼠标点击到表格空白区域，所有选择单元格将被取消，会触发这个事件
 
+## SELECTED_CHANGED
+
+单元格选中范围改变事件
+
+回调参数：
+```
+{
+    col: number;
+    row: number;
+    ranges: CellRange[];
+  };
+```
+
 ## KEYDOWN
 
 键盘按下事件
@@ -150,6 +184,10 @@ TABLE_EVENT_TYPE = {
 单元格右键事件
 
 {{ use: MousePointerMultiCellEvent() }}
+
+## CONTEXTMENU_CANVAS
+
+画布右键事件
 
 ## MOUSEENTER_TABLE
 
@@ -670,3 +708,39 @@ event: Event;
 ## EMPTY_TIP_DBLCLICK
 
 空数据提示双击事件。
+
+## AFTER_UPDATE_CELL_CONTENT_WIDTH
+
+单元格内容宽度更新后触发的事件。
+
+事件回调函数的参数类型:
+
+```
+{
+  col: number;
+  row: number;
+  cellHeight: number;
+  cellGroup: any;
+  padding: [number, number, number, number];
+  textBaseline: CanvasTextBaseline;
+}
+```
+
+## AFTER_UPDATE_SELECT_BORDER_HEIGHT
+
+选择边框高度更新后触发的事件。
+
+事件回调函数的参数类型:
+
+```
+{
+  startRow: number;
+  endRow: number;
+  currentHeight: number;
+  selectComp: { 
+    rect: any; 
+    fillhandle?: any; 
+    role: string; 
+  };
+}
+```

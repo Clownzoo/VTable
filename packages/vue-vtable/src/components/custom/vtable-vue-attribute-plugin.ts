@@ -1,10 +1,4 @@
-/*
- * @Author: lym
- * @Date: 2025-02-24 09:32:53
- * @LastEditors: lym
- * @LastEditTime: 2025-04-01 17:33:53
- * @Description:
- */
+import { CUSTOM_CONTAINER_NAME, CUSTOM_MERGE_PRE_NAME } from '@visactor/vtable';
 import type {
   CommonDomOptions,
   IGraphic,
@@ -14,7 +8,7 @@ import type {
   IText,
   SimpleDomStyleOptions
 } from '@visactor/vtable/es/vrender';
-import { HtmlAttributePlugin, application } from '@visactor/vtable/es/vrender';
+import { HtmlAttributePlugin, application, vglobal } from '@visactor/vtable/es/vrender';
 import {
   calculateAnchorOfBounds,
   isArray,
@@ -106,7 +100,7 @@ export class VTableVueAttributePlugin extends HtmlAttributePlugin implements IPl
     }
 
     this.isRendering = true;
-    requestAnimationFrame(() => {
+    vglobal.getRequestAnimationFrame()(() => {
       this.renderQueue.forEach(graphic => {
         try {
           this.doRenderGraphic(graphic);
@@ -568,7 +562,7 @@ export class VTableVueAttributePlugin extends HtmlAttributePlugin implements IPl
   private requestStyleUpdate() {
     if (!this.styleUpdateRequested) {
       this.styleUpdateRequested = true;
-      requestAnimationFrame(() => {
+      vglobal.getRequestAnimationFrame()(() => {
         this.styleUpdateQueue.forEach((changes, id) => {
           const container = this.htmlMap?.[id]?.wrapContainer;
           if (container) {
@@ -708,7 +702,7 @@ function checkFrozenContainer(graphic: IGraphic) {
  */
 function getTargetGroup(target: any) {
   while (target?.parent) {
-    if (target.name === 'custom-container') {
+    if (target.name === CUSTOM_CONTAINER_NAME || (target.name || '').startsWith(CUSTOM_MERGE_PRE_NAME)) {
       return target;
     }
     target = target.parent;

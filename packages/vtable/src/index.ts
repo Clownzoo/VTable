@@ -9,7 +9,7 @@ import * as icons from './icons';
 import * as register from './register';
 import * as themes from './themes';
 import * as DataStatistics from './dataset/DataStatistics';
-import * as plugins from './plugins';
+import * as pluginsDefinition from './plugins';
 import type {
   ColumnDefine,
   ColumnsDefine,
@@ -53,6 +53,7 @@ export * from './render/jsx';
 export { getTargetCell } from './event/util';
 export { toBoxArray } from './tools/helper';
 export { Icon } from './scenegraph/graphic/icon';
+export { CUSTOM_MERGE_PRE_NAME, CUSTOM_CONTAINER_NAME } from './scenegraph/component/custom';
 
 // export * as VRender from './vrender';
 // import * as VRender from './vrender';
@@ -111,7 +112,7 @@ export {
   graphicUtil,
   setCustomAlphabetCharSet,
   restoreMeasureText,
-  plugins
+  pluginsDefinition
   // VRender // should use import {xxx} from '@visactor/vtable/es/vrender'
 };
 

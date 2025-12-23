@@ -46,7 +46,7 @@ export function computeRowsHeight(
   isClearRowRangeHeightsMap: boolean = true,
   update?: boolean
 ): void {
-  const time = typeof window !== 'undefined' ? window.performance.now() : 0;
+  // const time = typeof window !== 'undefined' ? window.performance.now() : 0;
 
   const oldRowHeights: number[] = [];
   const newHeights: number[] = [];
@@ -134,6 +134,7 @@ export function computeRowsHeight(
           (table.isPivotTable() && !(table.internalProps.layoutMap as PivotHeaderLayoutMap).indicatorsAsCol)
         ) &&
         !(table.options as ListTableConstructorOptions).customComputeRowHeight &&
+        !(table.options as ListTableConstructorOptions).rowHeightConfig &&
         checkFixedStyleAndNoWrap(table, rowStart)
       ) {
         // check fixed style and no wrap situation, fill all row width single compute
@@ -318,11 +319,6 @@ export function computeRowsHeight(
       }
     }
 
-    // if (
-    //   table.heightMode === 'adaptive' ||
-    //   (table.autoFillHeight && table.getAllRowsHeight() <= table.tableNoFrameHeight) ||
-    //   (table.options as ListTableConstructorOptions).customComputeRowHeight
-    // ) {
     for (let row = 0; row <= table.frozenRowCount - 1; row++) {
       const newRowHeight = table.getRowHeight(row);
       if (newRowHeight !== (oldRowHeights[row] ?? table.getRowHeight(row))) {
@@ -337,7 +333,6 @@ export function computeRowsHeight(
         table.scenegraph.updateRowHeight(row, newRowHeight - (oldRowHeights[row] ?? table.getRowHeight(row)), true);
       }
     }
-    // }
 
     // update body row
     for (let row = table.scenegraph.proxy.rowStart; row <= table.scenegraph.proxy.rowEnd; row++) {
@@ -375,15 +370,40 @@ export function computeRowHeight(row: number, startCol: number, endCol: number, 
       return table.getDefaultRowHeight(row) as number;
     }
   }
+  if (table.internalProps.rowHeightConfig) {
+    const rowHeightConfig = table.internalProps.rowHeightConfig.find((item: { key: number }) => item.key === row);
+    if (rowHeightConfig) {
+      if (!table.internalProps._heightResizedRowMap.has(row)) {
+        table._setRowHeight(row, rowHeightConfig.height);
+        table.internalProps._heightResizedRowMap.add(row); // add resize tag
+      }
+      return rowHeightConfig.height;
+    }
+  }
   // 如果是透视图
   if (
     table.isPivotChart() &&
     row >= table.columnHeaderLevelCount &&
     row < table.rowCount - table.bottomFrozenRowCount
   ) {
-    if ((table.internalProps.layoutMap as PivotHeaderLayoutMap).indicatorsAsCol) {
+    let ifNeedComputeRowHeight = (table.internalProps.layoutMap as PivotHeaderLayoutMap).indicatorsAsCol;
+    let isHeatmap = false;
+    if (!(table.internalProps.layoutMap as PivotHeaderLayoutMap).indicatorsAsCol) {
+      const chartSpec = (table.internalProps.layoutMap as PivotHeaderLayoutMap).getChartSpec(
+        table.rowHeaderLevelCount,
+        row
+      );
+      if (chartSpec.type === 'heatmap') {
+        isHeatmap = true;
+        ifNeedComputeRowHeight = true;
+      }
+    }
+    if (ifNeedComputeRowHeight) {
       //并且指标是以列展示 计算行高需要根据y轴的值域范围
-      const optimunHeight = (table.internalProps.layoutMap as PivotHeaderLayoutMap).getOptimunHeightForChart(row);
+      const optimunHeight = (table.internalProps.layoutMap as PivotHeaderLayoutMap).getOptimunHeightForChart(
+        row,
+        isHeatmap
+      );
       if (optimunHeight > 0) {
         return optimunHeight;
       }

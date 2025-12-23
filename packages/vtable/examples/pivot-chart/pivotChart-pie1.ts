@@ -9170,6 +9170,19 @@ export function createTable() {
     // }
   };
   const option: VTable.PivotChartConstructorOptions = {
+    chartDimensionLinkage: {
+      showTooltip: true,
+      heightLimitToShowTooltipForEdgeRow: 60,
+      widthLimitToShowTooltipForEdgeColumn: 90,
+      labelHoverOnAxis: {
+        bottom: {
+          visible: true
+        },
+        left: {
+          visible: true
+        }
+      }
+    },
     rows,
     columns,
     indicators,

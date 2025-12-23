@@ -153,3 +153,76 @@ export interface IIndicatorHeaderNode {
       prefix = '#',
       tableType = 'pivotChart'
   ) }}
+
+## columnWidthConfig(Array)
+
+依据维度信息设置列宽
+
+```
+ {
+    dimensions: IDimensionInfo[];
+    width: number;
+  }[];
+```
+
+- dimensions 列表头维度各层级的维度信息，是一个 IDimensionInfo 类型的数组，vtable 会根据这个路径来定位到具体的列。
+  {{ use: common-IDimensionInfo()}}
+
+- width 指定列宽。
+
+## columnWidthConfigForRowHeader(Array)
+
+依据行维度信息设置行表头列宽, 设置示例：
+```
+columnWidthConfigForRowHeader": [
+    {
+      "dimensions": [
+        {
+          "dimensionKey": "city",
+          "value": "北京"
+        }
+      ],
+      "width": 318
+    }
+  ]
+```
+匹配关键是行维度的key：dimensionKey。
+
+## chartDimensionLinkage(Object)
+
+多个图表基于相同维度值进行交互联动的功能，是否开启，具体配置项如下：
+
+```
+export interface PivotChartConstructorOptions {
+  chartDimensionLinkage?: {
+    showTooltip?: boolean;
+    heightLimitToShowTooltipForEdgeRow?: number;
+    widthLimitToShowTooltipForEdgeColumn?: number;
+    labelHoverOnAxis?: {
+      bottom?: LineAxisAttributes['labelHoverOnAxis'];
+      left?: LineAxisAttributes['labelHoverOnAxis'];
+      right?: LineAxisAttributes['labelHoverOnAxis'];
+      top?: LineAxisAttributes['labelHoverOnAxis'];
+    };
+  };
+}
+```
+
+- showTooltip: 是否显示tooltip，默认true。
+- heightLimitToShowTooltipForEdgeRow: 针对条形图折线图等， 整列显示tooltip时，第一行及最后一行可能被滚动遮挡只显示一部分的情况下，检测该图表显示出来至少多高 可允许显示tooltip。
+- widthLimitToShowTooltipForEdgeColumn: 针对横向条形图，整行显示tooltip时，第一列及最后一列可能被滚动遮挡只显示一部分的情况下，检测该图表显示出来至少多宽 可允许显示tooltip。
+- labelHoverOnAxis: 鼠标hover到透视图上时，轴上悬浮label标签的相关配置。支持left、right、top、bottom四个方向的配置。
+
+举例配置：
+```
+chartDimensionLinkage: {
+  showTooltip: true,
+  heightLimitToShowTooltipForEdgeRow: 60,
+  widthLimitToShowTooltipForEdgeColumn: 90,
+  labelHoverOnAxis: {
+    bottom: {
+      visible: true
+    }
+  }
+}
+```

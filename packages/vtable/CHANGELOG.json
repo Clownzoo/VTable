@@ -2,6 +2,529 @@
   "name": "@visactor/vtable",
   "entries": [
     {
+      "version": "1.22.8",
+      "tag": "@visactor/vtable_v1.22.8",
+      "date": "Wed, 17 Dec 2025 09:28:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "fix: when pivot table set grid-tree subTotal value not show #4815\n\n"
+          },
+          {
+            "comment": "docs: supplement chartDimensionLinkage demo\n\n"
+          },
+          {
+            "comment": "feat: vtable-sheet support cross sheet calculate formula\n\n"
+          },
+          {
+            "comment": "feat: support import multiply sheets from excel file\n\n"
+          },
+          {
+            "comment": "fix: scroll bug when update option"
+          },
+          {
+            "comment": "feat: add update styles api for filter plugin.close#4790"
+          },
+          {
+            "comment": "feat: support custom styles. close#4720"
+          },
+          {
+            "comment": "feat: support custom conditionCategories. close#4781"
+          },
+          {
+            "comment": "fix: filter swtich enable erroe. fix#4783"
+          },
+          {
+            "comment": "feat: emit event when filter menu hide or show. close#4784"
+          },
+          {
+            "comment": "fix: apply filter after update table data. fix#4785"
+          },
+          {
+            "comment": "feat: add option to format display value. close#4786"
+          },
+          {
+            "comment": "fix: update filter state and keys when update data. fix#4787"
+          },
+          {
+            "comment": "feat: menu limit to body range. close#4791"
+          },
+          {
+            "comment": "fix: select none not effect. fix#4792"
+          },
+          {
+            "comment": "feat: add config to disable sync multiple filter state. close#4793"
+          },
+          {
+            "comment": "fix: empty line bug"
+          },
+          {
+            "comment": "fix: update checkbox state after update data. fix#4795"
+          },
+          {
+            "comment": "add config to control filter result"
+          },
+          {
+            "comment": "feat: excel export multiply sheets\n\n"
+          },
+          {
+            "comment": "fix: delete key down should not complete edit cell\n\n"
+          },
+          {
+            "comment": "fix: pivotChart linkage getAxis node occor error\n\n"
+          },
+          {
+            "comment": "fix: panel hide when press enter. fix#4813"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.22.7",
+      "tag": "@visactor/vtable_v1.22.7",
+      "date": "Mon, 08 Dec 2025 09:36:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "refactor: optimize linkage pivotChart tooltip\n\n"
+          },
+          {
+            "comment": "fix: pivotChart axis should change zero when has range\n\n"
+          },
+          {
+            "comment": "feat: resize support set canResizeColumn function #4764\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.22.6",
+      "tag": "@visactor/vtable_v1.22.6",
+      "date": "Mon, 01 Dec 2025 11:33:45 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "feat: copy formula to paste cell\n\n"
+          },
+          {
+            "comment": "feat: vtable-sheet support formula auto fill\n\n"
+          },
+          {
+            "comment": "fix: excel keyboard del and back to delete\n\n"
+          },
+          {
+            "comment": "fix: distinguish null and empty string values in row/column dimensions\n\n"
+          },
+          {
+            "comment": "fix: the filter plugin cannot be opened normally when clicked #4736\n\n"
+          },
+          {
+            "comment": "fix: clear the value of the searchInput when the filter plugin is displayed #4736\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.22.5",
+      "tag": "@visactor/vtable_v1.22.5",
+      "date": "Wed, 26 Nov 2025 02:07:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "feat: support right axis in pivotChart spec #4723\n\n"
+          },
+          {
+            "comment": "feat: add enableChartDimensionLinkage for pivotChart\n\n"
+          },
+          {
+            "comment": "feat: add chartDimensionLinkage for pivotChart\n\n"
+          },
+          {
+            "comment": "fix: add null check for nodeChildren in matchDimensionPath\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.22.4",
+      "tag": "@visactor/vtable_v1.22.4",
+      "date": "Tue, 18 Nov 2025 06:13:47 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "refactor: filter plugins update when filterState changes"
+          },
+          {
+            "comment": "fix: fix backtracking issue in getCellAdressByHeaderPath matching algorithm\n\n"
+          },
+          {
+            "comment": "fix(pivot-table): fix frozenColCount being invalid when set to 0\n\n"
+          },
+          {
+            "comment": "fix: the serial number cannot be edited #4627\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.22.3",
+      "tag": "@visactor/vtable_v1.22.3",
+      "date": "Fri, 07 Nov 2025 09:51:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "fix: vtable-sheet drag column position #4645\n\n"
+          },
+          {
+            "comment": "feat: add dragOrder to vtableSheet\n\n"
+          },
+          {
+            "comment": "refactor: overscrollBehavior set none not scrollbar effect #4675\n\n"
+          },
+          {
+            "comment": "fix: leftTop cornder render frame border line #4677\n\n"
+          },
+          {
+            "comment": "feat: add api getCellRowHeaderFullPaths for pivotTable\n\n"
+          },
+          {
+            "comment": "feat: support boxPlot chart in pivotChart\n\n"
+          },
+          {
+            "comment": "fix: the getTargetGroup method of vue-vtable #4663\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.22.2",
+      "tag": "@visactor/vtable_v1.22.2",
+      "date": "Wed, 29 Oct 2025 04:47:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "feat: drag order for vtable-sheet\n\n"
+          },
+          {
+            "comment": "fix: drag row order to update rowHeightMap\n\n"
+          },
+          {
+            "comment": "feat: drag column order to update and calculate formula\n\n"
+          },
+          {
+            "comment": "fix: select row use row series number with cell merge, select state error\n\n"
+          },
+          {
+            "comment": "refactor: requestAnimationFrame use vrender api #4619\n\n"
+          },
+          {
+            "comment": "refactor: formula context support lower case character #4628\n\n"
+          },
+          {
+            "comment": "fix: after resize column width legend title position error #4629\n\n"
+          },
+          {
+            "comment": "feat: add adaptive mode for auto fill width"
+          },
+          {
+            "comment": "fix: adjust formula dependency cell change\n\n"
+          },
+          {
+            "comment": "fix: fix issue of markline layout in PivotChart\n\n"
+          },
+          {
+            "comment": "fix: the resize event of tableContainer #4558\n\n"
+          },
+          {
+            "comment": "fix: vue-vtable dynamic rendering editing #4621\n\n"
+          },
+          {
+            "comment": "feat: the addition of the refValue parameter in vue-vtable dynamic rendering editing now supports v-model #4597\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.22.1",
+      "tag": "@visactor/vtable_v1.22.1",
+      "date": "Fri, 17 Oct 2025 02:49:45 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "fix: the getFilteredRecords method of PivotTable\n\n"
+          },
+          {
+            "comment": "feat: a new getFilteredRecords method has been added to ListTable #4537\n\n"
+          },
+          {
+            "comment": "fix: plugin HighlightHeaderWhenSelectCellPlugin options parse\n\n"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "feat: add master detail table plugin\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.21.1",
+      "tag": "@visactor/vtable_v1.21.1",
+      "date": "Tue, 14 Oct 2025 03:40:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "fix: zoom axis component should release\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.21.0",
+      "tag": "@visactor/vtable_v1.21.0",
+      "date": "Mon, 13 Oct 2025 09:24:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "fix: the updateFilterRules method of PivotTable #4450"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.20.3",
+      "tag": "@visactor/vtable_v1.20.3",
+      "date": "Fri, 10 Oct 2025 11:28:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "fix: paste html to cell no work #4551\n\n"
+          },
+          {
+            "comment": "fix: select formula item use keyboard arrowUp and arrowDown\n\n"
+          },
+          {
+            "comment": "fix: dbclick the automatic column width in the rightFrozenColCount configuration #4526\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.20.2",
+      "tag": "@visactor/vtable_v1.20.2",
+      "date": "Thu, 09 Oct 2025 10:16:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "fix: umd build for plugins\n\n"
+          },
+          {
+            "comment": "docs: vtable sheet umd import\n\n"
+          },
+          {
+            "comment": "fix: search component clear method #4476\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.20.1",
+      "tag": "@visactor/vtable_v1.20.1",
+      "date": "Fri, 26 Sep 2025 10:28:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "feat: extend chart type\n\n"
+          },
+          {
+            "comment": "fix: deleteRecord switchState error after call renderWidthCreateCells api #4436\n\n"
+          },
+          {
+            "comment": "fix: maxfrozenwidth not work when set brower scale #4494\n\n"
+          },
+          {
+            "comment": "fix: gannt grid line style linedash not work #4495\n\n"
+          },
+          {
+            "comment": "fix: when updateOption change enablecheckboxcascade not work #4499\n\n"
+          },
+          {
+            "comment": "fix: api selectCells not work with ctrlMultiSelect false\n\n"
+          },
+          {
+            "comment": "fix: row change order not work with pagination\n\n"
+          },
+          {
+            "comment": "feat: support detailPath when pick vchart to add detectPickChartItem config\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.20.0",
+      "tag": "@visactor/vtable_v1.20.0",
+      "date": "Mon, 22 Sep 2025 03:03:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "chore: update vrender version to 1.0.16\n\n"
+          },
+          {
+            "comment": "feat: add cutSelected for vtable\n\n"
+          },
+          {
+            "comment": "feat: add HyperFormula & refactor formulat-manager\n\n"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "feat: add vtable sheet component\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.19.9",
+      "tag": "@visactor/vtable_v1.19.9",
+      "date": "Fri, 12 Sep 2025 09:25:46 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "fix: add isReleased check before resize in initialization"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.19.8",
+      "tag": "@visactor/vtable_v1.19.8",
+      "date": "Fri, 29 Aug 2025 06:50:15 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "fix: getLayoutRowTree api error #4346\n\n"
+          },
+          {
+            "comment": "fix: when has many columns expand columnTree scenegraph node y error #4357\n\n"
+          },
+          {
+            "comment": "refactor: contextmenu-click event arguments #4364\n\n"
+          },
+          {
+            "comment": "fix: columnWidthConfig not work when just has indicator on pivot table #4388\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.19.7",
+      "tag": "@visactor/vtable_v1.19.7",
+      "date": "Mon, 18 Aug 2025 11:14:19 GMT",
+      "comments": {}
+    },
+    {
+      "version": "1.19.6",
+      "tag": "@visactor/vtable_v1.19.6",
+      "date": "Fri, 08 Aug 2025 06:24:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "fix: pivot table set columnHierarchyType gird expand tree error #4254\n\n"
+          },
+          {
+            "comment": "fix: when no records markline render error #4305\n\n"
+          },
+          {
+            "comment": "feat: pivot chart add columnWidthConfig option\n\n"
+          },
+          {
+            "comment": "refactor: add table export plugin\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.19.5",
+      "tag": "@visactor/vtable_v1.19.5",
+      "date": "Thu, 31 Jul 2025 11:30:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "feat: add enableHeaderCheckboxCascade option\n\n"
+          },
+          {
+            "comment": "refactor: when delete and add records update checkstate #4240\n\n"
+          },
+          {
+            "comment": "fix: setCellCheckboxState not work when tree column set checkbox cell type\n\n"
+          },
+          {
+            "comment": "feat: add  move_end_task_bar event for vtable-gantt.#4266\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.19.4",
+      "tag": "@visactor/vtable_v1.19.4",
+      "date": "Mon, 28 Jul 2025 09:57:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "refactor: update merge cell performance #3293\n\n"
+          },
+          {
+            "comment": "feat: rowSeriesNumber support set field #3902\n\n"
+          },
+          {
+            "comment": "feat: add enableCheckboxCascade option #4130\n\n"
+          },
+          {
+            "comment": "feat: add groupConfig replace groupBy and group** & add titleCheckbox #4130\n\n"
+          },
+          {
+            "comment": "refactor: hide menu list when scroll #4214\n\n"
+          },
+          {
+            "comment": "feat: add getRecordHierarchyState api and fix change header position arguments #4226\n\n"
+          },
+          {
+            "comment": "fix: vchart trasnparent bgColor replace cell hover color #4245\n\n"
+          },
+          {
+            "comment": "fix: fix loading icon update in pivot-table #4236"
+          },
+          {
+            "comment": "feat: add paste-add-row plugin\n\n"
+          },
+          {
+            "comment": "Merge branch feat/paste-add-row-plugin into feat-pasted-add-row-col-plugin\n\n"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.19.3",
+      "tag": "@visactor/vtable_v1.19.3",
+      "date": "Wed, 09 Jul 2025 09:24:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "feat: add contextmenuReturnAllSelectedCells api #4064\n\n"
+          },
+          {
+            "comment": "fix: click to edit cell not work with groupBy #4172\n\n"
+          },
+          {
+            "comment": "fix: 修复自定义编辑器复制粘贴时无法触发异步校验的问题\n\n"
+          },
+          {
+            "comment": "fix: handle frozen column calculation when container is invisible\n\n"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.19.2",
       "tag": "@visactor/vtable_v1.19.2",
       "date": "Tue, 01 Jul 2025 10:26:51 GMT",

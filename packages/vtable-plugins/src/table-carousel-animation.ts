@@ -1,7 +1,7 @@
 import type { EasingType } from '@visactor/vtable/es/vrender';
 import type { BaseTableAPI } from '@visactor/vtable/es/ts-types/base-table';
 import { TABLE_EVENT_TYPE } from '@visactor/vtable';
-import type * as VTable from '@visactor/vtable';
+import type { pluginsDefinition } from '@visactor/vtable';
 function isInteger(value: number) {
   return Math.floor(value) === value;
 }
@@ -20,8 +20,8 @@ export interface ITableCarouselAnimationPluginOptions {
   customDistColFunction?: (col: number, table: BaseTableAPI) => { distCol: number; animation?: boolean } | undefined;
 }
 
-export class TableCarouselAnimationPlugin implements VTable.plugins.IVTablePlugin {
-  id = `table-carousel-animation-${Date.now()}`;
+export class TableCarouselAnimationPlugin implements pluginsDefinition.IVTablePlugin {
+  id = `table-carousel-animation`;
   name = 'Table Carousel Animation';
   runTime = [TABLE_EVENT_TYPE.INITIALIZED];
   table: BaseTableAPI;
@@ -96,14 +96,15 @@ export class TableCarouselAnimationPlugin implements VTable.plugins.IVTablePlugi
     }
 
     let animation = true;
+    const screenTopRow = Math.max(this.table.scenegraph.proxy.screenTopRow, this.table.frozenRowCount);
     const customRow = this.customDistRowFunction && this.customDistRowFunction(this.row, this.table);
     if (customRow) {
       this.row = customRow.distRow;
       animation = customRow.animation ?? true;
-    } else if (isInteger(this.row) && this.table.scenegraph.proxy.screenTopRow !== this.row) {
+    } else if (isInteger(this.row) && screenTopRow !== this.row) {
       this.row = this.table.frozenRowCount;
       animation = false;
-    } else if (!isInteger(this.row) && this.table.scenegraph.proxy.screenTopRow !== Math.floor(this.row)) {
+    } else if (!isInteger(this.row) && screenTopRow !== Math.floor(this.row)) {
       this.row = this.table.frozenRowCount;
       animation = false;
     } else {

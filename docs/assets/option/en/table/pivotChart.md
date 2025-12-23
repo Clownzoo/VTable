@@ -153,3 +153,77 @@ Turn on asynchronous rendering of charts. The number of progressively rendered c
       prefix = '#',
       tableType = 'pivotChart'
   ) }}
+
+## columnWidthConfig(Array)
+
+Set column width based on dimension information
+
+```
+ {
+    dimensions: IDimensionInfo[];
+    width: number;
+  }[];
+```
+
+- dimensions The column dimension information of each level of the dimension is an array of IDimensionInfo type. The vtable will locate the specific column according to this path.
+  {{ use: common-IDimensionInfo()}}
+
+-width specifies the column width.
+
+## columnWidthConfigForRowHeader(Array)
+
+Set column width based on row dimension information for row header，set example:
+
+```
+columnWidthConfigForRowHeader": [
+    {
+      "dimensions": [
+        {
+          "dimensionKey": "city",
+          "value": "北京"
+        }
+      ],
+      "width": 318
+    }
+  ]
+```
+Matching key is the key of the row dimension: dimensionKey。
+
+## chartDimensionLinkage(Object)
+
+The configuration of the multiple charts based on the same dimension value for interactive functions, whether to turn on, the specific configuration items are as follows:
+
+```
+export interface PivotChartConstructorOptions {
+  chartDimensionLinkage?: {
+    showTooltip?: boolean;
+    heightLimitToShowTooltipForEdgeRow?: number;
+    widthLimitToShowTooltipForEdgeColumn?: number;
+    labelHoverOnAxis?: {
+      bottom?: LineAxisAttributes['labelHoverOnAxis'];
+      left?: LineAxisAttributes['labelHoverOnAxis'];
+      right?: LineAxisAttributes['labelHoverOnAxis'];
+      top?: LineAxisAttributes['labelHoverOnAxis'];
+    };
+  };
+}
+```
+
+- showTooltip: whether to display tooltip, default is true.
+- heightLimitToShowTooltipForEdgeRow: for bar chart, line chart, etc., when displaying tooltip for an entire column, it is detected that the first row and the last row may be occluded by scrolling and only a part of it is displayed. The minimum height allowed to display the tooltip is detected.
+- widthLimitToShowTooltipForEdgeColumn: for horizontal bar chart, when displaying tooltip for an entire row, it is detected that the first column and the last column may be occluded by scrolling and only a part of it is displayed. The minimum width allowed to display the tooltip is detected.
+- labelHoverOnAxis: the related configuration of the floating label label on the axis when the mouse hovers over the perspective chart. Supports configuration for the left, right, top, and bottom four directions.
+
+Example configuration:
+```
+chartDimensionLinkage: {
+  showTooltip: true,
+  heightLimitToShowTooltipForEdgeRow: 60,
+  widthLimitToShowTooltipForEdgeColumn: 90,
+  labelHoverOnAxis: {
+    bottom: {
+      visible: true
+    }
+  }
+}
+```
